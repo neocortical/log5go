@@ -96,3 +96,7 @@ func (l *stdLogger) GetLogLevel() LogLevel {
 func (l *stdLogger) SetLogLevel(level LogLevel) {
 	l.level = level
 }
+
+func RegisterLogLevel(level LogLevel, prefix string) {
+  levelMap[level] = prefix
+}
