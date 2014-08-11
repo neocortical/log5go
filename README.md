@@ -55,6 +55,8 @@ Features
 ========
 
 * Dead simple: Create a logger and go
+* Supports string formatting, just like fmt.Printf()
+* Standard built-in log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
 * Console or file logging
 * Full control over date/time format (uses time.Format under the hood)
 * Rolling file appender (roll each minute, hour, day, or week)
