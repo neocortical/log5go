@@ -45,7 +45,7 @@ type stdLogger struct {
 }
 
 var levelMap = map[LogLevel]string{
-  LogAll: "???",
+  LogAll: "LOG",
   LogTrace: "TRACE",
   LogDebug: "DEBUG",
   LogInfo:  "INFO",
