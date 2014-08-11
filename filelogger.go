@@ -128,7 +128,7 @@ func durationForRollFrequency(freq RollFrequency) time.Duration {
 
 // Create a new file logger
 func NewFileLogger(dir string, filename string, level LogLevel, timePrefix string) (_ Log4Go, err error) {
-	expandedDir, err := filepath.Abs(filepath.Dir(dir))
+	expandedDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func NewFileLogger(dir string, filename string, level LogLevel, timePrefix strin
 
 // Create a new rolling file logger that rotates logs with freq frequency
 func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefix string, freq RollFrequency, oldLogsToSave uint) (_ Log4Go, err error) {
-	expandedDir, err := filepath.Abs(filepath.Dir(dir))
+	expandedDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
 	}
