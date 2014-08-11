@@ -1,7 +1,7 @@
 log4go
 ======
 
-A simple, powerful logging library for Go.
+A simple logging library for Go.
 
 Example:
 ========
