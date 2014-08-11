@@ -1,9 +1,9 @@
 package log4go
 
 import (
-  "time"
+	"time"
 )
 
 type appender interface {
-  Append(msg string, level LogLevel, tstamp time.Time)
+	Append(msg string, level LogLevel, tstamp time.Time)
 }
