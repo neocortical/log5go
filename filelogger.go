@@ -151,7 +151,7 @@ func NewFileLogger(dir string, filename string, level LogLevel, timePrefix strin
   return Log4Go(&result), nil
 }
 
-func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefix string, freq RollFrequency, save uint) (_ Log4Go, err error) {
+func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefix string, freq RollFrequency, oldLogsToSave uint) (_ Log4Go, err error) {
   expandedDir, err := filepath.Abs(filepath.Dir(dir))
   if err != nil {
     return nil, err
@@ -168,7 +168,7 @@ func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefi
     if err != nil {
       return nil, err
     }
-    appender = &fileAppender{sync.Mutex{}, logfile, calculateNextRollTime(time.Now(), freq), freq, save}
+    appender = &fileAppender{sync.Mutex{}, logfile, calculateNextRollTime(time.Now(), freq), freq, oldLogsToSave}
     fileAppenderMap[fullFilename] = appender
   }
 
