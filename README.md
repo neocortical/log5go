@@ -51,6 +51,20 @@ log, err := log4go.NewRollingFileLogger("/tmp", "foo.log", log4go.LogInfo, log4g
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
+Custom logging levels
+---------------------
+```go
+var LLCustomDebug log4go.LogLevel = log4go.LogDebug + 1
+var LLCustomLogLevel log4go.LogLevel = log4go.LogInfo + 1
+var LLCustomInfo log4go.LogLevel = log4go.LogInfo + 2
+
+log := log4go.NewConsoleLogger(LLCustomLogLevel, log4go.TF_GoStd)
+
+log.Log(LLCustomDebug, "Won't see this")
+log.Info("Won't see this either")
+log.Log(LLCustomInfo, "This will get logged")
+```
+
 Features
 ========
 
@@ -58,6 +72,7 @@ Features
 * Supports string formatting, just like fmt.Printf()
 * Standard built-in log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
 * Console or file logging
+* Interleave custom log levels with standard ones 
 * Full control over date/time format (uses time.Format under the hood)
 * Rolling file appender (roll each minute, hour, day, or week)
 * Console log can send errors to stderr instead of stdout
