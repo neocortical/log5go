@@ -2,9 +2,6 @@ package log4go
 
 import (
 	"fmt"
-  "io"
-	"os"
-  "sync"
   "time"
 )
 
@@ -38,8 +35,7 @@ type Log4Go interface {
 }
 
 type stdLogger struct {
-  lock sync.Mutex
-	w io.WriteCloser
+  appender appender
 	level LogLevel
   timePrefix string
 }
@@ -55,18 +51,17 @@ var levelMap = map[LogLevel]string{
 }
 
 func (l *stdLogger) Log(level LogLevel, format string, a ...interface{}) {
+  tstamp := time.Now()
   if level >= l.level {
     msg := fmt.Sprintf(format, a...)
     if l.timePrefix != "" {
-      timePrefix := time.Now().Format(l.timePrefix)
+      timePrefix := tstamp.Format(l.timePrefix)
       msg = fmt.Sprintf("%s %s: %s\n", timePrefix, levelMap[level], msg)
     } else {
       msg = fmt.Sprintf("%s: %s\n", levelMap[level], msg)
     }
 
-    l.lock.Lock()
-    defer l.lock.Unlock()
-    l.w.Write([]byte(msg))
+    l.appender.Append(msg, level, tstamp)
   }
 }
 
@@ -100,14 +95,4 @@ func (l *stdLogger) GetLogLevel() LogLevel {
 
 func (l *stdLogger) SetLogLevel(level LogLevel) {
   l.level = level
-}
-
-func NewConsoleLogger(level LogLevel, timePrefix string) Log4Go {
-  result := stdLogger{
-    sync.Mutex{},
-    os.Stdout,
-    level,
-    timePrefix,
-  }
-  return Log4Go(&result)
 }
