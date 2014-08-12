@@ -6,14 +6,14 @@ import (
 )
 
 // Inner type of all loggers
-type stdLogger struct {
+type logger struct {
 	level      LogLevel
 	appender   appender
 	timeFormat string
 }
 
 // Log a message at the given log level
-func (l *stdLogger) Log(level LogLevel, format string, a ...interface{}) {
+func (l *logger) Log(level LogLevel, format string, a ...interface{}) {
 	tstamp := time.Now()
 	if level >= l.level {
 		msg := fmt.Sprintf(format, a...)
@@ -28,34 +28,34 @@ func (l *stdLogger) Log(level LogLevel, format string, a ...interface{}) {
 	}
 }
 
-func (l *stdLogger) Trace(format string, a ...interface{}) {
+func (l *logger) Trace(format string, a ...interface{}) {
 	l.Log(LogTrace, format, a...)
 }
 
-func (l *stdLogger) Debug(format string, a ...interface{}) {
+func (l *logger) Debug(format string, a ...interface{}) {
 	l.Log(LogDebug, format, a...)
 }
 
-func (l *stdLogger) Info(format string, a ...interface{}) {
+func (l *logger) Info(format string, a ...interface{}) {
 	l.Log(LogInfo, format, a...)
 }
 
-func (l *stdLogger) Warn(format string, a ...interface{}) {
+func (l *logger) Warn(format string, a ...interface{}) {
 	l.Log(LogWarn, format, a...)
 }
 
-func (l *stdLogger) Error(format string, a ...interface{}) {
+func (l *logger) Error(format string, a ...interface{}) {
 	l.Log(LogError, format, a...)
 }
 
-func (l *stdLogger) Fatal(format string, a ...interface{}) {
+func (l *logger) Fatal(format string, a ...interface{}) {
 	l.Log(LogFatal, format, a...)
 }
 
-func (l *stdLogger) GetLogLevel() LogLevel {
+func (l *logger) GetLogLevel() LogLevel {
 	return l.level
 }
 
-func (l *stdLogger) SetLogLevel(level LogLevel) {
+func (l *logger) SetLogLevel(level LogLevel) {
 	l.level = level
 }

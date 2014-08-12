@@ -131,7 +131,7 @@ func (b *logBuilder) Build() (_ Log4Go, _ error) {
 		return nil, b.errs
 	}
 
-	logger := stdLogger{
+	logger := logger{
 		b.level,
 		b.appender,
 		b.timeFormat,
