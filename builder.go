@@ -11,7 +11,7 @@ import (
 
 type logBuilder struct {
 	level      LogLevel
-	appender   appender
+	appender   Appender
 	timeFormat string
 	errs       *compositeError
 }

@@ -8,7 +8,7 @@ import (
 // Inner type of all loggers
 type logger struct {
 	level      LogLevel
-	appender   appender
+	appender   Appender
 	timeFormat string
 }
 
