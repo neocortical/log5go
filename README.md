@@ -61,6 +61,21 @@ log, err = log4go.Log(log4go.LogDebug).ToFile("/tmp", "foo.log").WithRotation(lo
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
+Using the internal registry
+---------------------------
+
+```go
+// In mypkg/foo.go
+log, err := log4go.Log(log4go.LogDebug).ToFile("/tmp", "mypkg.log").Register("mypkg/mainlog")
+log.Info("Hello from file foo.go")
+
+// In mypkg/bar.go
+log, err := log4go.GetLog("mypkg/mainlog")
+log.Info("Hello from file bar.go")
+```
+Note: It's a good convention to prefix log names with your package name to avoid collisions when
+more than one package uses Log4Go in the same process.
+
 Custom logging levels
 ---------------------
 ```go
@@ -84,7 +99,7 @@ Features
 * Supports string formatting, just like fmt.Printf()
 * Standard built-in log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
 * Console or file logging
-* Register loggers at the package level and retrieve statically by key
+* Register loggers and retrieve by key (no globals, or passing logs around)
 * Interleave custom log levels with standard ones
 * Full control over date/time format (uses time.Format under the hood)
 * Rolling file appender (roll each minute, hour, day, or week)
@@ -94,8 +109,8 @@ Features
 TODO
 ====
 
-* Testing! Pretty good coverage for log rotation date math, but litte else
-* Custom layouts
+* Testing! Pretty good coverage for log rotation date math, but needs builder, appender test coverage
+* Custom layouts (pattern, JSON, HTML, etc.)
 
 Caveats
 =======

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -140,15 +139,10 @@ func (b *logBuilder) Build() (_ Log4Go, _ error) {
 	return &logger, nil
 }
 
-// Build the logger you have been configuring. Returns the logger, or any errors
-// that have been encountered during the build process.
-func (b *logBuilder) Register(name string) (_ Log4Go, _ error) {
+// Build and register the logger you have been configuring. Returns the logger, or any errors
+// that have been encountered during the build/register process.
+func (b *logBuilder) Register(key string) (_ Log4Go, _ error) {
 	logger, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	key, err := generateLoggerKey(name)
 	if err != nil {
 		return nil, err
 	}
@@ -159,19 +153,4 @@ func (b *logBuilder) Register(name string) (_ Log4Go, _ error) {
 	}
 
 	return logger, nil
-}
-
-// Generate logger registry key. WARNING: Must be runtime call-level 2 within package. This is brittle!
-func generateLoggerKey(name string) (_ string, _ error) {
-	_, file, _, ok := runtime.Caller(2)
-	if !ok {
-		return "", fmt.Errorf("error generating registry key: caller lookup")
-	}
-
-	keybase, err := filepath.Abs(filepath.Dir(file))
-	if err != nil {
-		return "", fmt.Errorf("error generating registry key: %v", err)
-	}
-
-	return filepath.Join(keybase, name), nil
 }

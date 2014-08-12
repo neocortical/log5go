@@ -41,12 +41,7 @@ const (
 const SaveAllOldLogs = -1
 
 // Gets a log by looking it up by name in the internal registry.
-func GetLog(name string) (_ Log4Go, err error) {
-	key, err := generateLoggerKey(name)
-	if err != nil {
-		return nil, err
-	}
-
+func GetLog(key string) (_ Log4Go, err error) {
 	return loggerRegistry.Get(key)
 }
 
