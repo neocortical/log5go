@@ -39,5 +39,14 @@ type LogBuilder interface {
 	WithStderrSupport() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log4Go, error)
-	//	BuildAndRegister(key string) (Log4Go, error) // TODO
+	BuildAndRegister(key string) (Log4Go, error)
+}
+
+func GetLog(name string) (_ Log4Go, err error) {
+	key, err := generateLoggerKey(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return loggerRegistry.Get(key)
 }
