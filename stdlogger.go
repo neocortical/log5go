@@ -5,12 +5,14 @@ import (
   "time"
 )
 
+// Inner type of all loggers
 type stdLogger struct {
   level      LogLevel
   appender   appender
   timeFormat string
 }
 
+// Log a message at the given log level
 func (l *stdLogger) Log(level LogLevel, format string, a ...interface{}) {
   tstamp := time.Now()
   if level >= l.level {

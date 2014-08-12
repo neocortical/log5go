@@ -15,6 +15,7 @@ type logBuilder struct {
   errs *compositeError
 }
 
+// Entry point for building a new logger. Start here. Takes the desired log level.
 func NewLog(level LogLevel) LogBuilder {
   builder := logBuilder{
     level,
@@ -25,11 +26,14 @@ func NewLog(level LogLevel) LogBuilder {
   return &builder
 }
 
+// Add a custom format to the logger
 func (b *logBuilder) WithTimeFormat(format string) LogBuilder {
   b.timeFormat = format
   return b
 }
 
+// Select the console appender. You must select an appender only once.
+// You must select an appender prior to configuring it.
 func (b *logBuilder) ToConsole() LogBuilder {
   if b.appender != nil {
     b.errs.append(fmt.Errorf("appender cannot be set more than once"))
@@ -39,6 +43,8 @@ func (b *logBuilder) ToConsole() LogBuilder {
   return b
 }
 
+// Select the file appender. You must select an appender only once.
+// You must select an appender prior to configuring it.
 func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
   if b.appender != nil {
     b.errs.append(fmt.Errorf("appender cannot be set more than once"))
@@ -75,6 +81,8 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
   return b
 }
 
+// Add file rotation configuration to the file appender. ToFile() must have been
+// called already.
 func (b *logBuilder) WithFileRotation(frequency RollFrequency, keepNLogs int) LogBuilder {
   if b.appender == nil {
     b.errs.append(fmt.Errorf("appender must be set first"))
@@ -94,6 +102,8 @@ func (b *logBuilder) WithFileRotation(frequency RollFrequency, keepNLogs int) Lo
   return b
 }
 
+// Send WARN, ERROR, and FATAL messages to stderr. ToConsole() must have been
+// called already.
 func (b *logBuilder) WithStderrSupport() LogBuilder {
   if b.appender == nil {
     b.errs.append(fmt.Errorf("appender must be set first"))
@@ -110,6 +120,8 @@ func (b *logBuilder) WithStderrSupport() LogBuilder {
   return b
 }
 
+// Build the logger you have been configuring. Returns the logger, or any errors
+// that have been encountered during the build process.
 func (b *logBuilder) Build() (_ Log4Go, _ error) {
   if b.appender == nil {
     b.errs.append(fmt.Errorf("cannot build without appender set"))

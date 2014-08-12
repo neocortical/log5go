@@ -24,7 +24,7 @@ var levelMap = map[LogLevel]string{
   LogFatal: "FATAL",
 }
 
-// replace a log level prefix string, or add one for a custom log level
+// Replace a log level prefix string, or add one for a custom log level
 func RegisterLogLevel(level LogLevel, prefix string) {
   levelMap[level] = prefix
 }
