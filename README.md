@@ -1,20 +1,23 @@
-log4go
+log5go
 ======
 
 (Yet another) simple, powerful logging library for Go.
 
-Very loosely based on the (in)famous log4j Java logging library, but uncluttered and Go-like.
+Very loosely based on the (in)famous log4j Java logging library, but uncluttered, Go-like, and awesome.
+
+Why 5? Because there are already about a squillion log4go projects on Github and I wanted to take it to the next level!
+
 
 Install
 =======
 
 ```
-go get github.com/neocortical/log4go
+go get github.com/neocortical/log5go
 ```
 
 And import:
 ```go
-import "github.com/neocortical/log4go"
+import l5g "github.com/neocortical/log5go"
 ```
 
 Examples
@@ -24,7 +27,7 @@ A simple console logger
 -----------------------
 
 ```go
-log, err := log4go.Log(log4go.LogAll).ToConsole().Build()
+log, err := l5g.Log(l5g.LogAll).ToConsole().Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -32,7 +35,7 @@ A logger with a custom time format
 ----------------------------------
 
 ```go
-log, err = log4go.Log(log4go.LogDebug).ToConsole().WithTimeFmt("Jan _2 15:04:05").Build()
+log, err = l5g.Log(l5g.LogDebug).ToConsole().WithTimeFmt("Jan _2 15:04:05").Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -40,7 +43,7 @@ A console logger that writes errors to stderr
 ---------------------------------------------
 
 ```go
-log, err = log4go.Log(log4go.LogAll).ToConsole().WithStderr().Build()
+log, err = l5g.Log(l5g.LogAll).ToConsole().WithStderr().Build()
 log.Info("Trace, debug, and info go to stdout")
 log.Error("Warn, error, and fatal go to stderr")
 ```
@@ -49,7 +52,7 @@ A simple file logger
 --------------------
 
 ```go
-log, err = log4go.Log(log4go.LogInfo).ToFile("/tmp", "foo.log").Build()
+log, err = l5g.Log(l5g.LogInfo).ToFile("/tmp", "foo.log").Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -57,7 +60,7 @@ A rolling file appender
 -----------------------
 
 ```go
-log, err = log4go.Log(log4go.LogDebug).ToFile("/tmp", "foo.log").WithRotation(log4go.RollDaily, 7).Build()
+log, err = l5g.Log(l5g.LogDebug).ToFile("/tmp", "foo.log").WithRotation(l5g.RollDaily, 7).Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -66,11 +69,11 @@ Using the internal registry
 
 ```go
 // In mypkg/foo.go
-log, err := log4go.Log(log4go.LogDebug).ToFile("/tmp", "mypkg.log").Register("mypkg/mainlog")
+log, err := l5g.Log(l5g.LogDebug).ToFile("/tmp", "mypkg.log").Register("mypkg/mainlog")
 log.Info("Hello from file foo.go")
 
 // In mypkg/bar.go
-log, err := log4go.GetLog("mypkg/mainlog")
+log, err := l5g.GetLog("mypkg/mainlog")
 log.Info("Hello from file bar.go")
 ```
 Note: It's a good convention to prefix log names with your package name to avoid collisions when
@@ -79,13 +82,13 @@ more than one package uses Log4Go in the same process.
 Custom logging levels
 ---------------------
 ```go
-var LLCustomDebug log4go.LogLevel = log4go.LogDebug + 1
-var LLCustomLogLevel log4go.LogLevel = log4go.LogInfo + 1
-var LLCustomInfo log4go.LogLevel = log4go.LogInfo + 2
+var LLCustomDebug l5g.LogLevel = l5g.LogDebug + 1
+var LLCustomLogLevel l5g.LogLevel = l5g.LogInfo + 1
+var LLCustomInfo l5g.LogLevel = l5g.LogInfo + 2
 
-log4go.RegisterLogLevel(LLCustomInfo, "CUSTOM_INFO") // optional
+l5g.RegisterLogLevel(LLCustomInfo, "CUSTOM_INFO") // optional
 
-log, err = log4go.Log(LLCustomLogLevel).ToConsole().Build()
+log, err = l5g.Log(LLCustomLogLevel).ToConsole().Build()
 
 log.Log(LLCustomDebug, "Won't see this: priority too low")
 log.Info("Won't see this either")
