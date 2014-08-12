@@ -13,7 +13,7 @@ type fileAppender struct {
   f             *os.File
   nextRollTime  time.Time
   rollFrequency RollFrequency
-  rollsToSave   int
+  keepNLogs     int
 }
 
 var fileAppenderMap = make(map[string]*fileAppender)
@@ -64,8 +64,8 @@ func (a *fileAppender) doRoll() {
   a.f, _ = os.Create(absoluteFilename)
 
   // if we are saving N archived logs, try to delete N+1
-  if a.rollsToSave > -1 {
-    for i := 0; i < a.rollsToSave; i++ {
+  if a.keepNLogs > -1 {
+    for i := 0; i < a.keepNLogs; i++ {
       lastTime = calculatePreviousRollTime(lastTime, a.rollFrequency)
     }
     deleteFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
