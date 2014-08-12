@@ -27,7 +27,7 @@ A simple console logger
 -----------------------
 
 ```go
-log, err := l5g.Log(l5g.LogAll).ToConsole().Build()
+log, err := l5g.Log(l5g.LogAll).ToStdout().Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -35,7 +35,7 @@ A logger with a custom time format
 ----------------------------------
 
 ```go
-log, err = l5g.Log(l5g.LogDebug).ToConsole().WithTimeFmt("Jan _2 15:04:05").Build()
+log, err = l5g.Log(l5g.LogDebug).ToStdout().WithTimeFmt("Jan _2 15:04:05").Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -43,7 +43,7 @@ A console logger that writes errors to stderr
 ---------------------------------------------
 
 ```go
-log, err = l5g.Log(l5g.LogAll).ToConsole().WithStderr().Build()
+log, err = l5g.Log(l5g.LogAll).ToStdout().WithStderr().Build()
 log.Info("Trace, debug, and info go to stdout")
 log.Error("Warn, error, and fatal go to stderr")
 ```
@@ -88,7 +88,7 @@ var LLCustomInfo l5g.LogLevel = l5g.LogInfo + 2
 
 l5g.RegisterLogLevel(LLCustomInfo, "CUSTOM_INFO") // optional
 
-log, err = l5g.Log(LLCustomLogLevel).ToConsole().Build()
+log, err = l5g.Log(LLCustomLogLevel).ToStdout().Build()
 
 log.Log(LLCustomDebug, "Won't see this: priority too low")
 log.Info("Won't see this either")
