@@ -1,4 +1,4 @@
-package log4go
+package log5go
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func (b *logBuilder) WithTimeFmt(format string) LogBuilder {
 
 // Select the console appender. You must select an appender only once.
 // You must select an appender prior to configuring it.
-func (b *logBuilder) ToConsole() LogBuilder {
+func (b *logBuilder) ToStdout() LogBuilder {
 	if b.appender != nil {
 		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
 	}
@@ -122,7 +122,7 @@ func (b *logBuilder) WithStderr() LogBuilder {
 
 // Build the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build process.
-func (b *logBuilder) Build() (_ Log4Go, _ error) {
+func (b *logBuilder) Build() (_ log5go, _ error) {
 	if b.appender == nil {
 		b.errs.append(fmt.Errorf("cannot build without appender set"))
 	}
@@ -141,7 +141,7 @@ func (b *logBuilder) Build() (_ Log4Go, _ error) {
 
 // Build and register the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build/register process.
-func (b *logBuilder) Register(key string) (_ Log4Go, _ error) {
+func (b *logBuilder) Register(key string) (_ log5go, _ error) {
 	logger, err := b.Build()
 	if err != nil {
 		return nil, err

@@ -1,8 +1,8 @@
-package log4go
+package log5go
 
-// Log4Go is log4go's primary logging interface. All logging is performed using
+// log5go is log5go's primary logging interface. All logging is performed using
 // the methods defined here.
-type Log4Go interface {
+type Log5Go interface {
 	Log(level LogLevel, format string, a ...interface{})
 	Trace(format string, a ...interface{})
 	Debug(format string, a ...interface{})
@@ -17,13 +17,13 @@ type Log4Go interface {
 // LogBuilder is the interface for building loggers.
 type LogBuilder interface {
 	WithTimeFmt(format string) LogBuilder
-	ToConsole() LogBuilder
+	ToStdout() LogBuilder
 	ToFile(directory string, filename string) LogBuilder
 	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
 	WithStderr() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
-	Build() (Log4Go, error)
-	Register(key string) (Log4Go, error)
+	Build() (log5go, error)
+	Register(key string) (log5go, error)
 }
 
 type rollFrequency uint8
@@ -41,7 +41,7 @@ const (
 const SaveAllOldLogs = -1
 
 // Gets a log by looking it up by name in the internal registry.
-func GetLog(key string) (_ Log4Go, err error) {
+func GetLog(key string) (_ log5go, err error) {
 	return loggerRegistry.Get(key)
 }
 

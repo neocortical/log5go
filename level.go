@@ -1,4 +1,4 @@
-package log4go
+package log5go
 
 type LogLevel uint16
 

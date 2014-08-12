@@ -118,6 +118,6 @@ TODO
 Caveats
 =======
 
-Log5Go is a young project and has not been deployed in production environments. Use at your own risk.
+log5go is a young project and has not been deployed in production environments. Use at your own risk.
 
 Please feel free to contribute feedback, advice, feature suggestions, and pull requests!

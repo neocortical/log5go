@@ -1,4 +1,4 @@
-package log4go
+package log5go
 
 import (
   "fmt"
@@ -6,16 +6,16 @@ import (
 )
 
 type registry struct {
-  registry map[string]Log4Go
+  registry map[string]log5go
   lock sync.RWMutex
 }
 
 var loggerRegistry = &registry{
-  make(map[string]Log4Go),
+  make(map[string]log5go),
   sync.RWMutex{},
 }
 
-func (r *registry) Put(key string, logger Log4Go) error {
+func (r *registry) Put(key string, logger log5go) error {
   r.lock.Lock()
   defer r.lock.Unlock()
 
@@ -27,7 +27,7 @@ func (r *registry) Put(key string, logger Log4Go) error {
   return nil
 }
 
-func (r *registry) Get(key string) (_ Log4Go, _ error) {
+func (r *registry) Get(key string) (_ log5go, _ error) {
   r.lock.RLock()
   defer r.lock.RUnlock()
 
