@@ -37,7 +37,7 @@ type LogBuilder interface {
 	ToFile(directory string, filename string) LogBuilder
 	WithFileRotation(frequency RollFrequency, keepNLogs int) LogBuilder
 	WithStderrSupport() LogBuilder
-// WithLayout(pattern string) LogBuilder // TODO
+	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log4Go, error)
-//	BuildAndRegister(key string) (Log4Go, error) // TODO
+	//	BuildAndRegister(key string) (Log4Go, error) // TODO
 }

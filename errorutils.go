@@ -3,35 +3,35 @@ package log4go
 import "bytes"
 
 type compositeError struct {
-  errs []error
+	errs []error
 }
 
 func (e *compositeError) Error() string {
-  if !e.hasErrors() {
-    return ""
-  } else if len(e.errs) == 1 {
-    return e.errs[0].Error()
-  }
+	if !e.hasErrors() {
+		return ""
+	} else if len(e.errs) == 1 {
+		return e.errs[0].Error()
+	}
 
-  var buffer bytes.Buffer
+	var buffer bytes.Buffer
 
-  buffer.WriteString("Composite Error:\n")
-  for _, err := range e.errs {
-    buffer.WriteString(err.Error())
-    buffer.WriteRune('\n')
-  }
+	buffer.WriteString("Composite Error:\n")
+	for _, err := range e.errs {
+		buffer.WriteString(err.Error())
+		buffer.WriteRune('\n')
+	}
 
-  return buffer.String()
+	return buffer.String()
 }
 
 func (e *compositeError) append(err error) {
-  e.errs = append(e.errs, err)
+	e.errs = append(e.errs, err)
 }
 
 func (e *compositeError) hasErrors() bool {
-  return len(e.errs) > 0
+	return len(e.errs) > 0
 }
 
 func newCompositeError() *compositeError {
-  return &compositeError{make([]error, 0, 0)}
+	return &compositeError{make([]error, 0, 0)}
 }

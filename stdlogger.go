@@ -1,61 +1,61 @@
 package log4go
 
 import (
-  "fmt"
-  "time"
+	"fmt"
+	"time"
 )
 
 // Inner type of all loggers
 type stdLogger struct {
-  level      LogLevel
-  appender   appender
-  timeFormat string
+	level      LogLevel
+	appender   appender
+	timeFormat string
 }
 
 // Log a message at the given log level
 func (l *stdLogger) Log(level LogLevel, format string, a ...interface{}) {
-  tstamp := time.Now()
-  if level >= l.level {
-    msg := fmt.Sprintf(format, a...)
-    if l.timeFormat != "" {
-      timePrefix := tstamp.Format(l.timeFormat)
-      msg = fmt.Sprintf("%s %s: %s\n", timePrefix, levelMap[level], msg)
-    } else {
-      msg = fmt.Sprintf("%s: %s\n", levelMap[level], msg)
-    }
+	tstamp := time.Now()
+	if level >= l.level {
+		msg := fmt.Sprintf(format, a...)
+		if l.timeFormat != "" {
+			timePrefix := tstamp.Format(l.timeFormat)
+			msg = fmt.Sprintf("%s %s: %s\n", timePrefix, levelMap[level], msg)
+		} else {
+			msg = fmt.Sprintf("%s: %s\n", levelMap[level], msg)
+		}
 
-    l.appender.Append(msg, level, tstamp)
-  }
+		l.appender.Append(msg, level, tstamp)
+	}
 }
 
 func (l *stdLogger) Trace(format string, a ...interface{}) {
-  l.Log(LogTrace, format, a...)
+	l.Log(LogTrace, format, a...)
 }
 
 func (l *stdLogger) Debug(format string, a ...interface{}) {
-  l.Log(LogDebug, format, a...)
+	l.Log(LogDebug, format, a...)
 }
 
 func (l *stdLogger) Info(format string, a ...interface{}) {
-  l.Log(LogInfo, format, a...)
+	l.Log(LogInfo, format, a...)
 }
 
 func (l *stdLogger) Warn(format string, a ...interface{}) {
-  l.Log(LogWarn, format, a...)
+	l.Log(LogWarn, format, a...)
 }
 
 func (l *stdLogger) Error(format string, a ...interface{}) {
-  l.Log(LogError, format, a...)
+	l.Log(LogError, format, a...)
 }
 
 func (l *stdLogger) Fatal(format string, a ...interface{}) {
-  l.Log(LogFatal, format, a...)
+	l.Log(LogFatal, format, a...)
 }
 
 func (l *stdLogger) GetLogLevel() LogLevel {
-  return l.level
+	return l.level
 }
 
 func (l *stdLogger) SetLogLevel(level LogLevel) {
-  l.level = level
+	l.level = level
 }
