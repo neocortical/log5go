@@ -1,9 +1,9 @@
 log4go
 ======
 
-A simple, powerful logging library for Go.
+(Yet another) simple, powerful logging library for Go.
 
-Very loosely based on the (in)famous log4j Java logging library.
+Very loosely based on the (in)famous log4j Java logging library, but uncluttered and Go-like.
 
 Install
 =======
