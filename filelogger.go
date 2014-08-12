@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+type RollFrequency uint8
+
+// Log rotation frequencies. Daily rotates at midnight, weekly rotates on Sunday at midnight
 const (
 	RollNone     RollFrequency = iota
 	RollMinutely               // nice for testing
@@ -15,8 +18,6 @@ const (
 	RollDaily
 	RollWeekly
 )
-
-type RollFrequency uint8
 
 type fileAppender struct {
 	lock          sync.Mutex
@@ -69,61 +70,6 @@ func (a *fileAppender) doRoll() {
 	archiveFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
 	os.Rename(absoluteFilename, archiveFilename)
 	a.f, _ = os.Create(absoluteFilename)
-}
-
-func calculateNextRollTime(t time.Time, freq RollFrequency) time.Time {
-	if freq == RollMinutely {
-		t = t.Truncate(time.Minute)
-		return t.Add(time.Minute)
-	} else if freq == RollHourly {
-		t = t.Truncate(time.Hour)
-		return t.Add(time.Hour)
-	} else {
-		t = t.Truncate(time.Hour)
-		day := t.Day()
-		for ; t.Day() == day; t = t.Add(time.Hour) {
-		}
-		if freq == RollDaily {
-			return t
-		} else {
-			for ; t.Day() != day; t = t.Add(time.Hour) {
-			}
-			return t
-		}
-	}
-}
-
-func calculatePreviousRollTime(t time.Time, freq RollFrequency) time.Time {
-	if freq == RollMinutely {
-		return t.Add(-time.Minute)
-	} else if freq == RollHourly {
-		return t.Add(-time.Hour)
-	} else if freq == RollDaily {
-		t = t.Add(-time.Hour * 12)
-		for day := t.Day(); t.Day() == day; t = t.Add(-time.Hour) {
-		}
-		return t.Add(time.Hour)
-	} else {
-		t = t.Add(-time.Hour * 156)
-		for day := t.Day(); t.Day() == day; t = t.Add(-time.Hour) {
-		}
-		return t.Add(time.Hour)
-	}
-}
-
-func durationForRollFrequency(freq RollFrequency) time.Duration {
-	var d time.Duration
-	switch freq {
-	case RollMinutely:
-		d, _ = time.ParseDuration("1m")
-	case RollHourly:
-		d, _ = time.ParseDuration("1h")
-	case RollDaily:
-		d, _ = time.ParseDuration("24h")
-	case RollWeekly:
-		d, _ = time.ParseDuration("168h")
-	}
-	return d
 }
 
 // Create a new file logger
