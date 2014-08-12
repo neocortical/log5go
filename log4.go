@@ -1,24 +1,7 @@
 package log4go
 
-// Standard timestamp formats
-const (
-	TF_NCSA  = "02/Jan/2006:15:04:05 -0700"
-	TF_GoStd = "2006/01/02 15:04:05"
-)
-
-type RollFrequency uint8
-
-// Log rotation frequencies. Daily rotates at midnight, weekly rotates on Sunday at midnight
-const (
-	RollNone     RollFrequency = iota
-	RollMinutely               // nice for testing
-	RollHourly
-	RollDaily
-	RollWeekly
-)
-
-const SaveAllOldLogs = -1
-
+// Log4Go is log4go's primary logging interface. All logging is performed using
+// the methods defined here.
 type Log4Go interface {
 	Log(level LogLevel, format string, a ...interface{})
 	Trace(format string, a ...interface{})
@@ -31,17 +14,33 @@ type Log4Go interface {
 	SetLogLevel(level LogLevel)
 }
 
+// LogBuilder is the interface for building loggers.
 type LogBuilder interface {
 	WithTimeFormat(format string) LogBuilder
 	ToConsole() LogBuilder
 	ToFile(directory string, filename string) LogBuilder
-	WithFileRotation(frequency RollFrequency, keepNLogs int) LogBuilder
+	WithFileRotation(frequency rollFrequency, keepNLogs int) LogBuilder
 	WithStderrSupport() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log4Go, error)
 	BuildAndRegister(key string) (Log4Go, error)
 }
 
+type rollFrequency uint8
+
+// Log rotation frequencies. Daily rotates at midnight, weekly rotates on Sunday at midnight
+const (
+	RollNone     rollFrequency = iota
+	RollMinutely               // nice for testing
+	RollHourly
+	RollDaily
+	RollWeekly
+)
+
+// SaveAllOldLogs used as an argument to WithFileRotation(, keepNLogs)
+const SaveAllOldLogs = -1
+
+// Gets a log by looking it up by name in the internal registry.
 func GetLog(name string) (_ Log4Go, err error) {
 	key, err := generateLoggerKey(name)
 	if err != nil {
@@ -50,3 +49,10 @@ func GetLog(name string) (_ Log4Go, err error) {
 
 	return loggerRegistry.Get(key)
 }
+
+// Standard timestamp formats. You can use any format from the time package or
+// roll your own.
+const (
+	TF_GoStd = "2006/01/02 15:04:05" // Default
+	TF_NCSA  = "02/Jan/2006:15:04:05 -0700"
+)

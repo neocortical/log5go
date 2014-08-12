@@ -12,7 +12,7 @@ type fileAppender struct {
 	lock          sync.Mutex
 	f             *os.File
 	nextRollTime  time.Time
-	rollFrequency RollFrequency
+	rollFrequency rollFrequency
 	keepNLogs     int
 }
 

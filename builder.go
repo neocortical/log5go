@@ -84,7 +84,7 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
-func (b *logBuilder) WithFileRotation(frequency RollFrequency, keepNLogs int) LogBuilder {
+func (b *logBuilder) WithFileRotation(frequency rollFrequency, keepNLogs int) LogBuilder {
 	if b.appender == nil {
 		b.errs.append(fmt.Errorf("appender must be set first"))
 		return b

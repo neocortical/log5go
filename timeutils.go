@@ -5,7 +5,7 @@ import (
 )
 
 // given a time, calculate the instant that the log should next roll
-func calculateNextRollTime(t time.Time, freq RollFrequency) time.Time {
+func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 	if freq == RollMinutely {
 		t = t.Truncate(time.Minute)
 		return t.Add(time.Minute)
@@ -39,7 +39,7 @@ func calculateNextRollTime(t time.Time, freq RollFrequency) time.Time {
 
 // find the previous roll time for the given frequency.
 // time t is assumed to be truncated to a valid roll time.
-func calculatePreviousRollTime(t time.Time, freq RollFrequency) time.Time {
+func calculatePreviousRollTime(t time.Time, freq rollFrequency) time.Time {
 	switch freq {
 	case RollMinutely:
 		return t.Add(-time.Minute)
