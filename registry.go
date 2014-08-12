@@ -19,8 +19,6 @@ func (r *registry) Put(key string, logger Log4Go) error {
   r.lock.Lock()
   defer r.lock.Unlock()
 
-  fmt.Printf("putting logger for key: %s\n", key)
-
   if _, ok := r.registry[key]; ok {
     return fmt.Errorf("logger already exists for key: %s", key)
   }
