@@ -17,7 +17,7 @@ Examples
 
 The following example creates a file logger and registers it with the name "db":
 
-  log, err := log4go.NewLog(log4go.LogDebug).ToFile("/var/log", "myprog_db.log").BuildAndRegister("db")
+  log, err := log4go.Log(log4go.LogDebug).ToFile("/var/log", "myprog_db.log").Register("db")
 
 All package local code will be able to retrieve the same logger by calling:
 
@@ -28,10 +28,13 @@ obtain the desired logger without the need to create a global variable.
 
 The following example creates a file logger with a log rotation scheme:
 
-  log, err := log4go.NewLog(log4go.LogAll).ToFile("/var/log", "myprog.log").WithFileRotation(log4go.RollDaily, 7)
+  log, err := log4go.Log(log4go.LogAll).ToFile("/var/log", "myprog.log").WithRotation(log4go.RollDaily, 7).Build()
 
 In this example, the logger will archive the log file daily at midnight, maintaining a maximum
 of 7 archived log files. (A timestamp is appended to the name of each log file and an attempt is
 made to delete the file that was created 8 days ago.)
 */
 package log4go
+
+// Package version info
+const VERSION = "0.5.0"

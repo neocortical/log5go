@@ -16,14 +16,14 @@ type Log4Go interface {
 
 // LogBuilder is the interface for building loggers.
 type LogBuilder interface {
-	WithTimeFormat(format string) LogBuilder
+	WithTimeFmt(format string) LogBuilder
 	ToConsole() LogBuilder
 	ToFile(directory string, filename string) LogBuilder
-	WithFileRotation(frequency rollFrequency, keepNLogs int) LogBuilder
-	WithStderrSupport() LogBuilder
+	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
+	WithStderr() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log4Go, error)
-	BuildAndRegister(key string) (Log4Go, error)
+	Register(key string) (Log4Go, error)
 }
 
 type rollFrequency uint8

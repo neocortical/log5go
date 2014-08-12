@@ -17,7 +17,7 @@ type logBuilder struct {
 }
 
 // Entry point for building a new logger. Start here. Takes the desired log level.
-func NewLog(level LogLevel) LogBuilder {
+func Log(level LogLevel) LogBuilder {
 	builder := logBuilder{
 		level,
 		nil,
@@ -28,7 +28,7 @@ func NewLog(level LogLevel) LogBuilder {
 }
 
 // Add a custom format to the logger
-func (b *logBuilder) WithTimeFormat(format string) LogBuilder {
+func (b *logBuilder) WithTimeFmt(format string) LogBuilder {
 	b.timeFormat = format
 	return b
 }
@@ -84,7 +84,7 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
-func (b *logBuilder) WithFileRotation(frequency rollFrequency, keepNLogs int) LogBuilder {
+func (b *logBuilder) WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder {
 	if b.appender == nil {
 		b.errs.append(fmt.Errorf("appender must be set first"))
 		return b
@@ -105,7 +105,7 @@ func (b *logBuilder) WithFileRotation(frequency rollFrequency, keepNLogs int) Lo
 
 // Send WARN, ERROR, and FATAL messages to stderr. ToConsole() must have been
 // called already.
-func (b *logBuilder) WithStderrSupport() LogBuilder {
+func (b *logBuilder) WithStderr() LogBuilder {
 	if b.appender == nil {
 		b.errs.append(fmt.Errorf("appender must be set first"))
 		return b
@@ -142,7 +142,7 @@ func (b *logBuilder) Build() (_ Log4Go, _ error) {
 
 // Build the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build process.
-func (b *logBuilder) BuildAndRegister(name string) (_ Log4Go, _ error) {
+func (b *logBuilder) Register(name string) (_ Log4Go, _ error) {
 	logger, err := b.Build()
 	if err != nil {
 		return nil, err
