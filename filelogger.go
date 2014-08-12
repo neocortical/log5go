@@ -18,13 +18,15 @@ const (
 	RollWeekly
 )
 
+const SaveAllOldLogs = -1
+
 // Create a new file logger
 func NewFileLogger(dir string, filename string, level LogLevel, timePrefix string) (_ Log4Go, err error) {
 	return NewRollingFileLogger(dir, filename, level, timePrefix, RollNone, 0)
 }
 
 // Create a new rolling file logger that rotates logs with freq frequency
-func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefix string, freq RollFrequency, oldLogsToSave uint) (_ Log4Go, err error) {
+func NewRollingFileLogger(dir string, filename string, level LogLevel, timePrefix string, freq RollFrequency, oldLogsToSave int) (_ Log4Go, err error) {
 	expandedDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,7 @@ type fileAppender struct {
   f             *os.File
   nextRollTime  time.Time
   rollFrequency RollFrequency
-  rollsToSave   uint
+  rollsToSave   int
 }
 
 var fileAppenderMap = make(map[string]*fileAppender)
@@ -34,6 +34,7 @@ func (a *fileAppender) Append(msg string, level LogLevel, tstamp time.Time) {
   }
 }
 
+// Determine whether we should roll the log file. Must be in lock already.
 func (a *fileAppender) shouldRoll(tstamp time.Time) bool {
   if a.rollFrequency == RollNone {
     return false
@@ -42,6 +43,7 @@ func (a *fileAppender) shouldRoll(tstamp time.Time) bool {
   }
 }
 
+// Actually roll the log file. Must be in lock already.
 func (a *fileAppender) doRoll() {
   absoluteFilename := a.f.Name()
   dir, filename := filepath.Split(absoluteFilename)
@@ -60,8 +62,19 @@ func (a *fileAppender) doRoll() {
   archiveFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
   os.Rename(absoluteFilename, archiveFilename)
   a.f, _ = os.Create(absoluteFilename)
+
+  // if we are saving N archived logs, try to delete N+1
+  if a.rollsToSave > -1 {
+    for i := 0; i < a.rollsToSave; i++ {
+      lastTime = calculatePreviousRollTime(lastTime, a.rollFrequency)
+    }
+    deleteFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
+    os.Remove(deleteFilename)
+  }
 }
 
+
+// run in goroutine to periodically check logs for rollability
 func periodicFileRoller() {
 
 	ticker := time.NewTicker(time.Second*15)
