@@ -6,16 +6,16 @@ import (
 )
 
 type registry struct {
-  registry map[string]log5go
+  registry map[string]Log5Go
   lock sync.RWMutex
 }
 
 var loggerRegistry = &registry{
-  make(map[string]log5go),
+  make(map[string]Log5Go),
   sync.RWMutex{},
 }
 
-func (r *registry) Put(key string, logger log5go) error {
+func (r *registry) Put(key string, logger Log5Go) error {
   r.lock.Lock()
   defer r.lock.Unlock()
 
@@ -27,7 +27,7 @@ func (r *registry) Put(key string, logger log5go) error {
   return nil
 }
 
-func (r *registry) Get(key string) (_ log5go, _ error) {
+func (r *registry) Get(key string) (_ Log5Go, _ error) {
   r.lock.RLock()
   defer r.lock.RUnlock()
 

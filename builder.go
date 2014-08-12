@@ -122,7 +122,7 @@ func (b *logBuilder) WithStderr() LogBuilder {
 
 // Build the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build process.
-func (b *logBuilder) Build() (_ log5go, _ error) {
+func (b *logBuilder) Build() (_ Log5Go, _ error) {
 	if b.appender == nil {
 		b.errs.append(fmt.Errorf("cannot build without appender set"))
 	}
@@ -141,7 +141,7 @@ func (b *logBuilder) Build() (_ log5go, _ error) {
 
 // Build and register the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build/register process.
-func (b *logBuilder) Register(key string) (_ log5go, _ error) {
+func (b *logBuilder) Register(key string) (_ Log5Go, _ error) {
 	logger, err := b.Build()
 	if err != nil {
 		return nil, err

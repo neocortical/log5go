@@ -22,8 +22,8 @@ type LogBuilder interface {
 	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
 	WithStderr() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
-	Build() (log5go, error)
-	Register(key string) (log5go, error)
+	Build() (Log5Go, error)
+	Register(key string) (Log5Go, error)
 }
 
 type rollFrequency uint8
@@ -41,7 +41,7 @@ const (
 const SaveAllOldLogs = -1
 
 // Gets a log by looking it up by name in the internal registry.
-func GetLog(key string) (_ log5go, err error) {
+func GetLog(key string) (_ Log5Go, err error) {
 	return loggerRegistry.Get(key)
 }
 
