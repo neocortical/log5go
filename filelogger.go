@@ -128,32 +128,7 @@ func durationForRollFrequency(freq RollFrequency) time.Duration {
 
 // Create a new file logger
 func NewFileLogger(dir string, filename string, level LogLevel, timePrefix string) (_ Log4Go, err error) {
-	expandedDir, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	fullFilename := filepath.Join(expandedDir, filename)
-
-	fileAppenderMapLock.Lock()
-	defer fileAppenderMapLock.Unlock()
-
-	var appender *fileAppender = fileAppenderMap[fullFilename]
-	if appender == nil {
-		logfile, err := os.Create(fullFilename)
-		if err != nil {
-			return nil, err
-		}
-		appender = &fileAppender{sync.Mutex{}, logfile, time.Now(), RollNone, 0}
-		fileAppenderMap[fullFilename] = appender
-	}
-
-	result := stdLogger{
-		appender,
-		level,
-		timePrefix,
-	}
-	return Log4Go(&result), nil
+	return NewRollingFileLogger(dir, filename, level, timePrefix, RollNone, 0)
 }
 
 // Create a new rolling file logger that rotates logs with freq frequency
