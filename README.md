@@ -77,7 +77,7 @@ log, err := l5g.GetLog("mypkg/mainlog")
 log.Info("Hello from file bar.go")
 ```
 Note: It's a good convention to prefix log names with your package name to avoid collisions when
-more than one package uses Log4Go in the same process.
+more than one package uses log5go in the same process.
 
 Custom logging levels
 ---------------------
@@ -118,6 +118,6 @@ TODO
 Caveats
 =======
 
-Log4Go is a young project and has not been deployed in production environments. Use at your own risk.
+Log5Go is a young project and has not been deployed in production environments. Use at your own risk.
 
 Please feel free to contribute feedback, advice, feature suggestions, and pull requests!
