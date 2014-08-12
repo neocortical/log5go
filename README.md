@@ -3,6 +3,8 @@ log4go
 
 A simple, powerful logging library for Go.
 
+Very loosely based on the (in)famous log4j Java logging library.
+
 Install
 =======
 
@@ -30,7 +32,7 @@ A logger with a custom time format
 ----------------------------------
 
 ```go
-log, err = log4go.NewLog(log4go.LogAll).ToConsole().WithTimeFormat("Jan _2 15:04:05").Build()
+log, err = log4go.NewLog(log4go.LogDebug).ToConsole().WithTimeFormat("Jan _2 15:04:05").Build()
 log.Info("Hello, World. My PID is %d", os.Getpid())
 ```
 
@@ -82,6 +84,7 @@ Features
 * Supports string formatting, just like fmt.Printf()
 * Standard built-in log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
 * Console or file logging
+* Register loggers at the package level and retrieve statically by key
 * Interleave custom log levels with standard ones 
 * Full control over date/time format (uses time.Format under the hood)
 * Rolling file appender (roll each minute, hour, day, or week)
@@ -92,7 +95,6 @@ TODO
 ====
 
 * Testing! Pretty good coverage for log rotation date math, but litte else
-* Log registry for "static" retrieval of loggers via registered names
 * Custom layouts
 
 Caveats
@@ -100,4 +102,4 @@ Caveats
 
 Log4Go is something I whipped up in a couple days, because I was unsatisfied with the Go default logging library. I do not recommend using Log4Go for production code until it's been properly vetted.
 
-Please feel free to contribute feedback, advice, and pull requests! 
+Please feel free to contribute feedback, advice, feature suggestions, and pull requests! 
