@@ -13,7 +13,7 @@ func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 		t = t.Truncate(time.Hour)
 		t2 := t.Add(time.Hour)
 		// daylight savings end test
-		if t2.Hour() == t.Hour() {
+		for t2.Hour() == t.Hour() {
 			t2 = t2.Add(time.Hour)
 		}
 		return t2
