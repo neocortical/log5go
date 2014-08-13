@@ -49,28 +49,33 @@ func (a *fileAppender) doRoll() {
 	dir, filename := filepath.Split(absoluteFilename)
 	a.f.Close()
 
-	lastTime := calculatePreviousRollTime(a.nextRollTime, a.rollFrequency)
+	archiveTime := calculatePreviousRollTime(a.nextRollTime, a.rollFrequency)
+	archiveFilename := generateArchiveFilename(filename, archiveTime, a.rollFrequency)
 	a.nextRollTime = calculateNextRollTime(a.nextRollTime, a.rollFrequency)
 
-	var timeFormat string
-	if a.rollFrequency == RollMinutely || a.rollFrequency == RollHourly {
-		timeFormat = "2006-01-02T15-04"
-	} else {
-		timeFormat = "2006-01-02"
-	}
-
-	archiveFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
-	os.Rename(absoluteFilename, archiveFilename)
+	archiveAbsFilename := filepath.Join(dir, archiveFilename)
+	os.Rename(absoluteFilename, archiveAbsFilename)
 	a.f, _ = os.Create(absoluteFilename)
 
 	// if we are saving N archived logs, try to delete N+1
 	if a.keepNLogs > -1 {
 		for i := 0; i < a.keepNLogs; i++ {
-			lastTime = calculatePreviousRollTime(lastTime, a.rollFrequency)
+			archiveTime = calculatePreviousRollTime(archiveTime, a.rollFrequency)
 		}
-		deleteFilename := filepath.Join(dir, fmt.Sprintf("%s.%s", filename, lastTime.Format(timeFormat)))
+		deleteFilename := filepath.Join(dir, generateArchiveFilename(filename, archiveTime, a.rollFrequency))
 		os.Remove(deleteFilename)
 	}
+}
+
+func generateArchiveFilename(fname string, rollTime time.Time, freq rollFrequency) string {
+	var timeFormat string
+	if freq == RollMinutely || freq == RollHourly {
+		timeFormat = "2006-01-02-15-04-MST"
+	} else {
+		timeFormat = "2006-01-02"
+	}
+
+	return fmt.Sprintf("%s.%s", fname, rollTime.Format(timeFormat))
 }
 
 // run in goroutine to periodically check logs for rollability

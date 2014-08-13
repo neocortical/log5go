@@ -12,10 +12,6 @@ func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 	} else if freq == RollHourly {
 		t = t.Truncate(time.Hour)
 		t2 := t.Add(time.Hour)
-		// daylight savings end test
-		for t2.Hour() == t.Hour() {
-			t2 = t2.Add(time.Hour)
-		}
 		return t2
 	} else {
 		t = t.Truncate(time.Hour)
@@ -44,14 +40,7 @@ func calculatePreviousRollTime(t time.Time, freq rollFrequency) time.Time {
 	case RollMinutely:
 		return t.Add(-time.Minute)
 	case RollHourly:
-		t := t.Add(-time.Hour)
-		t2 := t.Add(-time.Hour)
-		// daylight savings end test
-		if t2.Hour() == t.Hour() {
-			return t2
-		} else {
-			return t
-		}
+		return t.Add(-time.Hour)
 	case RollDaily:
 		return t.AddDate(0, 0, -1)
 	case RollWeekly:
