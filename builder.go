@@ -83,6 +83,18 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 	return b
 }
 
+// ToAppender sets a custom (i.e third-party) appender as the destination for this logger.
+// No other appender setting methods must be called before or after.
+func (b *logBuilder) ToAppender(appender Appender) LogBuilder {
+	if b.appender != nil {
+		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
+		return b
+	}
+
+	b.appender = appender
+	return b
+}
+
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
 func (b *logBuilder) WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder {

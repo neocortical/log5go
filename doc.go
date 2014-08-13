@@ -37,7 +37,7 @@ made to delete the file that was created 8 days ago.)
 package log5go
 
 // Package version info
-const VERSION = "0.6.3"
+const VERSION = "0.7.0"
 const MAJOR_VERSION = 0
-const MINOR_VERSION = 6
-const PATCH_VERSION = 3
+const MINOR_VERSION = 7
+const PATCH_VERSION = 0

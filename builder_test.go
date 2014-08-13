@@ -247,3 +247,26 @@ func TestRegister(t *testing.T) {
 		t.Error("expected error trying to register name twice but got none")
 	}
 }
+
+type nilAppender struct{}
+
+func (a *nilAppender) Append(msg string, level LogLevel, tstamp time.Time) {
+	// NOOP
+}
+
+func TestToAppender(t *testing.T) {
+	appender := &nilAppender{}
+	lb := Log(LogAll).ToAppender(appender)
+	b, _ := lb.(*logBuilder)
+
+	if b.errs.hasErrors() {
+		t.Errorf("expected no errors after ToAppender() but got %v", b.errs.Error())
+	}
+	if b.appender == nil {
+		t.Error("expected appender set after ToAppender() but is nil")
+	}
+	a, _ := b.appender.(*nilAppender)
+	if a != appender {
+		t.Error("expected builder's appender to be equal to ToAppender() argument")
+	}
+}

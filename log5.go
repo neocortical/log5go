@@ -19,6 +19,7 @@ type LogBuilder interface {
 	WithTimeFmt(format string) LogBuilder
 	ToStdout() LogBuilder
 	ToFile(directory string, filename string) LogBuilder
+	ToAppender(appender Appender) LogBuilder
 	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
 	WithStderr() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
