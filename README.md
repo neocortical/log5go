@@ -112,8 +112,10 @@ Features
 TODO
 ====
 
-* Testing! Pretty good coverage for log rotation date math, but needs builder, appender test coverage
+* More testing. There's coverage for time (including DST rotation issues), log builder, and regsistry, but need more.
 * Custom layouts (pattern, JSON, HTML, etc.)
+* syslog
+* custom (third-party) appenders
 
 Caveats
 =======
