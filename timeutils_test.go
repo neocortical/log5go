@@ -116,6 +116,14 @@ func TestWeeklyOperations(t *testing.T) {
 }
 
 func TestHourlyHandlesDSTStart(t *testing.T) {
+
+	// XXX: deliberate break. Testing:
+	tt := time.Now()
+	tz, _ := tt.Zone()
+	if tz != "XXX" {
+		t.Errorf("expected some BS but got %s", tz)
+	}
+
 	t0, _ := time.Parse(time.RFC822, "09 Mar 14 00:15 PST")
 	t1, _ := time.Parse(time.RFC822, "09 Mar 14 01:00 PST")
 	t3, _ := time.Parse(time.RFC822, "09 Mar 14 03:00 PDT")
