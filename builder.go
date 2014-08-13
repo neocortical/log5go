@@ -37,6 +37,7 @@ func (b *logBuilder) WithTimeFmt(format string) LogBuilder {
 func (b *logBuilder) ToStdout() LogBuilder {
 	if b.appender != nil {
 		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
+		return b
 	}
 
 	b.appender = &consoleAppender{false}
@@ -48,6 +49,7 @@ func (b *logBuilder) ToStdout() LogBuilder {
 func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 	if b.appender != nil {
 		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
+		return b
 	}
 
 	expandedDir, err := filepath.Abs(directory)
