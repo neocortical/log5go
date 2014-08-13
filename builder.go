@@ -68,7 +68,7 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 			b.errs.append(err)
 			return b
 		}
-		appender = &fileAppender{sync.Mutex{}, logfile, time.Now(), RollNone, -1}
+		appender = &fileAppender{sync.Mutex{}, logfile, time.Now(), RollNone, SaveAllOldLogs}
 		fileAppenderMap[fullFilename] = appender
 	}
 
