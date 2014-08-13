@@ -108,6 +108,7 @@ Features
 * Rolling file appender (roll each minute, hour, day, or week)
 * Optionally store N old log files with date stamps
 * Console log can send errors to stderr instead of stdout
+* Extensible through custom appenders
 
 TODO
 ====
@@ -115,7 +116,6 @@ TODO
 * More testing. There's coverage for time (including DST rotation issues), log builder, and regsistry, but need more.
 * Custom layouts (pattern, JSON, HTML, etc.)
 * syslog support (better than Go's native support, about which even Go authors just shake their heads)
-* custom (third-party) appenders
 * log chaining
 
 Caveats
