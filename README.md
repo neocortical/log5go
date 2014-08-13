@@ -114,8 +114,9 @@ TODO
 
 * More testing. There's coverage for time (including DST rotation issues), log builder, and regsistry, but need more.
 * Custom layouts (pattern, JSON, HTML, etc.)
-* syslog
+* syslog support (better than Go's native support, about which even Go authors just shake their heads)
 * custom (third-party) appenders
+* log chaining
 
 Caveats
 =======
