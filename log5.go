@@ -1,6 +1,6 @@
 package log5go
 
-// log5go is log5go's primary logging interface. All logging is performed using
+// Log5Go is log5go's primary logging interface. All logging is performed using
 // the methods defined here.
 type Log5Go interface {
 	Log(level LogLevel, format string, a ...interface{})
