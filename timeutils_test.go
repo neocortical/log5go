@@ -128,7 +128,7 @@ func TestHourlyHandlesDSTStart(t *testing.T) {
 
 	tnext = calculateNextRollTime(tnext, RollHourly)
 	if !tnext.UTC().Equal(t3.UTC()) {
-		t.Errorf("Error getting t3. Expected %v but got %v", t3, tnext)
+		t.Errorf("Error getting t3. Expected %v but got %v", t3.UTC(), tnext.UTC())
 	}
 
 	tprev := calculatePreviousRollTime(tnext, RollHourly)
