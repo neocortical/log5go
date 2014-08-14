@@ -5,7 +5,7 @@ log5go
 
 Very loosely based on the (in)famous log4j Java logging library, but uncluttered, Go-like, and awesome.
 
-Why 5? Because there are already about a squillion log4go projects on Github and I wanted to take it to the next level!
+Log5Go is *mostly* compatible with Go's log package, and is almost a drop-in replacement. 
 
 [![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go)
 
