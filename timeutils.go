@@ -8,11 +8,10 @@ import (
 func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 	if freq == RollMinutely {
 		t = t.Truncate(time.Minute)
-		return t.Add(time.Minute)
+		t = t.Add(time.Minute)
 	} else if freq == RollHourly {
 		t = t.Truncate(time.Hour)
-		t2 := t.Add(time.Hour)
-		return t2
+		t = t.Add(time.Hour)
 	} else {
 		t = t.Truncate(time.Hour)
 		// easiest way to beat DST bugs is to just iterate
@@ -20,17 +19,21 @@ func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 			t = t.Add(-time.Hour)
 		}
 		if freq == RollDaily {
-			return t.AddDate(0, 0, 1)
+			t = t.AddDate(0, 0, 1)
 		} else {
 			if t.Weekday() == time.Sunday {
-				return t.AddDate(0, 0, 7)
+				t = t.AddDate(0, 0, 7)
+			} else {
+				for t.Weekday() != time.Sunday {
+					t = t.AddDate(0, 0, 1)
+				}
 			}
-			for t.Weekday() != time.Sunday {
-				t = t.AddDate(0, 0, 1)
-			}
-			return t
 		}
 	}
+
+	// get correct time zone for modified date
+	t, _ = time.Parse(time.RFC1123, t.Format(time.RFC1123))
+	return t
 }
 
 // find the previous roll time for the given frequency.
