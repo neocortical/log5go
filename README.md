@@ -5,7 +5,7 @@ log5go
 
 Very loosely based on the (in)famous log4j Java logging library, but uncluttered, Go-like, and awesome.
 
-Log5Go is *mostly* compatible with Go's log package, and is almost a drop-in replacement. 
+Log5Go is *mostly* compatible with Go's log package, and is almost a drop-in replacement. See section on replacing the Go logger for details.
 
 [![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go)
 
@@ -110,6 +110,18 @@ Features
 * Optionally store N old log files with date stamps
 * Console log can send errors to stderr instead of stdout
 * Extensible through custom appenders
+
+Replacing Go's Logger
+=====================
+
+Log5Go is almost a drop-in replacement for Go's built-in log package. Due to some of
+Log5Go's design decisions, there are a couple of incompatibilities that may need to be
+dealt with. Here are the steps to upgrade from the standard log package to Log5Go:
+
+* Change all imports from import "log" to import log "github.com/neocortical/log5go"
+* Change all calls to Panic(), Fatal(), and their variants to GoPanic(), GoFatal(), etc. (Print() and similar are fine)
+* If your code passes logs around, change all references from *Logger to Log5Go
+
 
 TODO
 ====
