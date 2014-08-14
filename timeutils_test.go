@@ -119,7 +119,7 @@ func TestHourlyHandlesDSTStart(t *testing.T) {
 
 	t0, _ := time.Parse(time.RFC822, "09 Mar 14 00:15 PST")
 	t1, _ := time.Parse(time.RFC822, "09 Mar 14 01:00 PST")
-	t3, _ := time.Parse(time.RFC822, "09 Mar 14 02:00 PST")
+	t3, _ := time.Parse(time.RFC822, "09 Mar 14 03:00 PDT")
 
 	tnext := calculateNextRollTime(t0, RollHourly)
 	if !tnext.Equal(t1) {
