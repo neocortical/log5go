@@ -1,18 +1,19 @@
 package log5go
 
 import (
-	"os"
+	"io"
 	"time"
 )
 
 type consoleAppender struct {
-	stderrAware bool
+	dest io.Writer
+	errDest io.Writer
 }
 
 func (a *consoleAppender) Append(msg string, level LogLevel, tstamp time.Time) {
-	if a.stderrAware && level >= LogWarn {
-		os.Stderr.Write([]byte(msg))
+	if a.errDest != nil && level >= LogWarn {
+		a.errDest.Write([]byte(msg))
 	} else {
-		os.Stdout.Write([]byte(msg))
+		a.dest.Write([]byte(msg))
 	}
 }

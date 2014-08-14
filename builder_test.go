@@ -1,6 +1,7 @@
 package log5go
 
 import (
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -57,8 +58,8 @@ func TestToStdout(t *testing.T) {
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
-	if a.stderrAware {
-		t.Error("consoleAppender stderr expected false but was true")
+	if a.errDest != nil {
+		t.Errorf("consoleAppender stderr expected nil but was %v", a.errDest)
 	}
 
 	// setting twice should result in error
@@ -77,8 +78,8 @@ func TestWithStdErr(t *testing.T) {
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
-	if !a.stderrAware {
-		t.Error("consoleAppender stderr expected true but was false")
+	if a.errDest != os.Stderr {
+		t.Errorf("consoleAppender stderr expected but was %v", a.errDest)
 	}
 }
 
@@ -184,8 +185,8 @@ func TestBuild(t *testing.T) {
 	if !ok {
 		t.Error("built logger's appender should be console but isn't")
 	}
-	if a.stderrAware {
-		t.Error("console logger should not be stderr aware by default")
+	if a.errDest != nil {
+		t.Error("console logger should not split errors by default")
 	}
 	if l.timeFormat != TF_GoStd {
 		t.Error("expected default TF %d but got %d", TF_GoStd, l.timeFormat)

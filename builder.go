@@ -40,7 +40,7 @@ func (b *logBuilder) ToStdout() LogBuilder {
 		return b
 	}
 
-	b.appender = &consoleAppender{false}
+	b.appender = &consoleAppender{os.Stdout, nil}
 	return b
 }
 
@@ -130,7 +130,7 @@ func (b *logBuilder) WithStderr() LogBuilder {
 		return b
 	}
 
-	a.stderrAware = true
+	a.errDest = os.Stderr
 	return b
 }
 
