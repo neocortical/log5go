@@ -2,15 +2,24 @@ package log5go
 
 import (
 	"fmt"
+	"os"
+	"sync"
 	"time"
 )
 
 // Inner type of all loggers
 type logger struct {
+	lock       sync.Mutex
 	level      LogLevel
 	appender   Appender
 	timeFormat string
+	prefix     string
+	lines      int
+	flag       int 				// needed to return by Flags()
+	buf        []byte     // for accumulating text to write
 }
+
+var std = New(os.Stderr, "", LstdFlags)
 
 // Log a message at the given log level
 func (l *logger) Log(level LogLevel, format string, a ...interface{}) {

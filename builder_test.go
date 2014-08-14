@@ -1,6 +1,7 @@
 package log5go
 
 import (
+	"bytes"
 	"os"
 	"reflect"
 	"testing"
@@ -90,6 +91,30 @@ func TestToStderr(t *testing.T) {
 
 	// setting twice should result in error
 	lb = Log(LogAll).ToStderr().ToStderr()
+	b, _ = lb.(*logBuilder)
+	if !b.errs.hasErrors() {
+		t.Error("expected errors after setting appender twice but got none")
+	}
+}
+
+func TestToWriter(t *testing.T) {
+	out := new(bytes.Buffer)
+	lb := Log(LogAll).ToWriter(out)
+	b, _ := lb.(*logBuilder)
+
+	a, ok := b.appender.(*consoleAppender)
+	if !ok {
+		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
+	}
+	if a.dest != out {
+		t.Errorf("consoleAppender to writer expected but was %v", a.dest)
+	}
+	if a.errDest != nil {
+		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
+	}
+
+	// setting twice should result in error
+	lb = Log(LogAll).ToWriter(out).ToWriter(out)
 	b, _ = lb.(*logBuilder)
 	if !b.errs.hasErrors() {
 		t.Error("expected errors after setting appender twice but got none")
@@ -249,6 +274,65 @@ func TestBuild(t *testing.T) {
 	}
 }
 
+func TestBuildWithPrefix(t *testing.T) {
+	log, err := Log(LogInfo).ToStdout().WithPrefix("foo").Build()
+	if err != nil {
+		t.Errorf("expected no errors but got %v", err)
+	}
+	l, _ := log.(*logger)
+	if l.prefix != "foo" {
+		t.Errorf("expected prefix 'foo' but got %s", l.prefix)
+	}
+}
+
+func TestBuildWithLines(t *testing.T) {
+	// no lines
+	log, err := Log(LogInfo).ToStdout().Build()
+	if err != nil {
+		t.Errorf("expected no errors but got %v", err)
+	}
+	l, _ := log.(*logger)
+	if l.lines != 0 {
+		t.Errorf("expected default no lines but got %d", l.lines)
+	}
+
+	// short lines
+	log, err = Log(LogInfo).ToStdout().WithLn().Build()
+	if err != nil {
+		t.Errorf("expected no errors but got %v", err)
+	}
+	l, _ = log.(*logger)
+	if l.lines != Lshortfile {
+		t.Errorf("expected short lines but got %d", l.lines)
+	}
+
+	// long lines
+	log, err = Log(LogInfo).ToStdout().WithLine().Build()
+	if err != nil {
+		t.Errorf("expected no errors but got %v", err)
+	}
+	l, _ = log.(*logger)
+	if l.lines != Llongfile {
+		t.Errorf("expected long lines but got %d", l.lines)
+	}
+}
+
+func TestBuildWithWriter(t *testing.T) {
+	out := new(bytes.Buffer)
+	log, err := Log(LogInfo).ToWriter(out).Build()
+	if err != nil {
+		t.Errorf("expected no errors but got %v", err)
+	}
+	l, _ := log.(*logger)
+	a, ok := l.appender.(*consoleAppender)
+	if !ok {
+		t.Errorf("expected console appender but got %v", reflect.TypeOf(l.appender))
+	}
+	if a.dest != out {
+		t.Errorf("expected custom dest but got %v", a.dest)
+	}
+}
+
 func TestRegister(t *testing.T) {
 	log1, _ := Log(LogInfo).ToStdout().Build()
 	log2, _ := Log(LogInfo).ToStdout().Build()
@@ -295,5 +379,34 @@ func TestToAppender(t *testing.T) {
 	a, _ := b.appender.(*nilAppender)
 	if a != appender {
 		t.Error("expected builder's appender to be equal to ToAppender() argument")
+	}
+}
+
+func TestWithPrefix(t *testing.T) {
+	lb := Log(LogAll).WithPrefix("foo")
+	b, _ := lb.(*logBuilder)
+
+	if b.prefix != "foo" {
+		t.Errorf("expected prefix 'foo' but got %s", b.prefix)
+	}
+}
+
+func TestWithLines(t *testing.T) {
+	lb := Log(LogAll)
+	b, _ := lb.(*logBuilder)
+	if b.lines != 0 {
+		t.Errorf("expected default of no lines but got %d", b.lines)
+	}
+
+	lb = Log(LogAll).WithLn()
+	b, _ = lb.(*logBuilder)
+	if b.lines != Lshortfile {
+		t.Errorf("expected short lines but got %d", b.lines)
+	}
+
+	lb = Log(LogAll).WithLine()
+	b, _ = lb.(*logBuilder)
+	if b.lines != Llongfile {
+		t.Errorf("expected long lines but got %d", b.lines)
 	}
 }

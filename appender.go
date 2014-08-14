@@ -10,3 +10,6 @@ import (
 type Appender interface {
 	Append(msg string, level LogLevel, tstamp time.Time)
 }
+
+// TODO: Appender should take []byte
+// TODO: Appender should return error (to satisfy compat Output)

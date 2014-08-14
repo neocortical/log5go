@@ -2,6 +2,7 @@ package log5go
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,16 +13,20 @@ type logBuilder struct {
 	level      LogLevel
 	appender   Appender
 	timeFormat string
+	prefix     string
+	lines      int
 	errs       *compositeError
 }
 
 // Entry point for building a new logger. Start here. Takes the desired log level.
 func Log(level LogLevel) LogBuilder {
 	builder := logBuilder{
-		level,
-		nil,
-		TF_GoStd,
-		newCompositeError(),
+		level: level,
+		appender: nil,
+		timeFormat: TF_GoStd,
+		prefix: "",
+		lines: 0,
+		errs: newCompositeError(),
 	}
 	return &builder
 }
@@ -53,6 +58,34 @@ func (b *logBuilder) ToStderr() LogBuilder {
 	}
 
 	b.appender = &consoleAppender{os.Stderr, nil}
+	return b
+}
+
+// Select the console appender with a custom destination.
+// You must select an appender only once.
+// You must select an appender prior to configuring it.
+func (b *logBuilder) ToWriter(out io.Writer) LogBuilder {
+	if b.appender != nil {
+		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
+		return b
+	}
+
+	b.appender = &consoleAppender{out, nil}
+	return b
+}
+
+func (b *logBuilder) WithPrefix(prefix string) LogBuilder {
+	b.prefix = prefix
+	return b
+}
+
+func (b *logBuilder) WithLine() LogBuilder {
+	b.lines = Llongfile
+	return b
+}
+
+func (b *logBuilder) WithLn()  LogBuilder {
+	b.lines = Lshortfile
 	return b
 }
 
@@ -158,9 +191,11 @@ func (b *logBuilder) Build() (_ Log5Go, _ error) {
 	}
 
 	logger := logger{
-		b.level,
-		b.appender,
-		b.timeFormat,
+		level: b.level,
+		appender: b.appender,
+		timeFormat: b.timeFormat,
+		prefix: b.prefix,
+		lines: b.lines,
 	}
 	return &logger, nil
 }

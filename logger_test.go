@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestOutput(t *testing.T) {
+func TestOutputOfMultipleLines(t *testing.T) {
 	year := time.Now().Year()
 	l := getTestLogger(LogAll)
 	l.Trace("foo: %d", 1)

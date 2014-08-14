@@ -1,5 +1,9 @@
 package log5go
 
+import (
+	"io"
+)
+
 // Log5Go is log5go's primary logging interface. All logging is performed using
 // the methods defined here.
 type Log5Go interface {
@@ -12,6 +16,7 @@ type Log5Go interface {
 	Fatal(format string, a ...interface{})
 	GetLogLevel() LogLevel
 	SetLogLevel(level LogLevel)
+	GoLogger
 }
 
 // LogBuilder is the interface for building loggers.
@@ -19,10 +24,14 @@ type LogBuilder interface {
 	WithTimeFmt(format string) LogBuilder
 	ToStdout() LogBuilder
 	ToStderr() LogBuilder
+	ToWriter(out io.Writer) LogBuilder
 	ToFile(directory string, filename string) LogBuilder
 	ToAppender(appender Appender) LogBuilder
 	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
 	WithStderr() LogBuilder
+	WithPrefix(prefix string) LogBuilder
+	WithLine() LogBuilder
+	WithLn() LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log5Go, error)
 	Register(key string) (Log5Go, error)
