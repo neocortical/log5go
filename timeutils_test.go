@@ -119,7 +119,7 @@ func TestHourlyHandlesDSTStart(t *testing.T) {
 
 	t0, _ := time.Parse(time.RFC822, "09 Mar 14 00:15 PST")
 	t1, _ := time.Parse(time.RFC822, "09 Mar 14 01:00 PST")
-	t3, _ := time.Parse(time.RFC822, "09 Mar 14 03:00 PDT")
+	t3, _ := time.Parse(time.RFC822, "09 Mar 14 02:00 PST")
 
 	tnext := calculateNextRollTime(t0, RollHourly)
 	if !tnext.Equal(t1) {
@@ -127,8 +127,8 @@ func TestHourlyHandlesDSTStart(t *testing.T) {
 	}
 
 	tnext = calculateNextRollTime(tnext, RollHourly)
-	if !tnext.UTC().Equal(t3.UTC()) {
-		t.Errorf("Error getting t3. Expected %v but got %v", t3.UTC(), tnext.UTC())
+	if !tnext.Equal(t3) {
+		t.Errorf("Error getting t3. Expected %v but got %v", t3, tnext)
 	}
 
 	tprev := calculatePreviousRollTime(tnext, RollHourly)
@@ -148,7 +148,7 @@ func TestHourlyHandlesDSTEnd(t *testing.T) {
 	}
 
 	tnext = calculateNextRollTime(tnext, RollHourly)
-	if !tnext.UTC().Equal(t2.UTC()) {
+	if !tnext.Equal(t2) {
 		t.Errorf("Error getting t2. Expected %v but got %v", t2, tnext)
 	}
 
