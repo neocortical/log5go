@@ -117,9 +117,11 @@ func TestWeeklyOperations(t *testing.T) {
 
 func TestHourlyHandlesDSTStart(t *testing.T) {
 
-	t0, _ := time.Parse(time.RFC822, "09 Mar 14 00:15 PST")
-	t1, _ := time.Parse(time.RFC822, "09 Mar 14 01:00 PST")
-	t3, _ := time.Parse(time.RFC822, "09 Mar 14 03:00 PDT")
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+
+	t0, _ := time.ParseInLocation(time.RFC822, "09 Mar 14 00:15 PST", loc)
+	t1, _ := time.ParseInLocation(time.RFC822, "09 Mar 14 01:00 PST", loc)
+	t3, _ := time.ParseInLocation(time.RFC822, "09 Mar 14 03:00 PDT", loc)
 
 	tnext := calculateNextRollTime(t0, RollHourly)
 	if !tnext.Equal(t1) {
