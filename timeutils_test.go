@@ -117,6 +117,7 @@ func TestWeeklyOperations(t *testing.T) {
 
 func TestHourlyHandlesDSTStart(t *testing.T) {
 
+  // err is ok here. times will be UTC and code/test will behave correctly
 	loc, _ := time.LoadLocation("America/Los_Angeles")
 
 	t0, _ := time.ParseInLocation(time.RFC822, "09 Mar 14 00:15 PST", loc)
@@ -140,9 +141,13 @@ func TestHourlyHandlesDSTStart(t *testing.T) {
 }
 
 func TestHourlyHandlesDSTEnd(t *testing.T) {
-	t0, _ := time.Parse(time.RFC822, "02 Nov 14 00:15 PDT")
-	t1, _ := time.Parse(time.RFC822, "02 Nov 14 01:00 PDT")
-	t2, _ := time.Parse(time.RFC822, "02 Nov 14 02:00 PDT")
+
+	// err is ok here. times will be UTC and code/test will behave correctly
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+
+	t0, _ := time.ParseInLocation(time.RFC822, "02 Nov 14 00:15 PDT", loc)
+	t1, _ := time.ParseInLocation(time.RFC822, "02 Nov 14 01:00 PDT", loc)
+	t2, _ := time.ParseInLocation(time.RFC822, "02 Nov 14 01:00 PST", loc)
 
 	tnext := calculateNextRollTime(t0, RollHourly)
 	if !tnext.Equal(t1) {
