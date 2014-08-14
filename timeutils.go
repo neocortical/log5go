@@ -31,8 +31,6 @@ func calculateNextRollTime(t time.Time, freq rollFrequency) time.Time {
 		}
 	}
 
-	// get correct time zone for modified date
-	t, _ = time.Parse(time.RFC1123, t.Format(time.RFC1123))
 	return t
 }
 
