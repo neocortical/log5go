@@ -229,17 +229,17 @@ func Println(v ...interface{}) {
 	std.Output(2, fmt.Sprintln(v...))
 }
 
-func Fatal(v ...interface{}) {
+func GoFatal(v ...interface{}) {
 	std.Output(2, fmt.Sprint(v...))
 	os.Exit(1)
 }
 
-func Fatalf(format string, v ...interface{}) {
+func GoFatalf(format string, v ...interface{}) {
 	std.Output(2, fmt.Sprintf(format, v...))
 	os.Exit(1)
 }
 
-func Fatalln(v ...interface{}) {
+func GoFatalln(v ...interface{}) {
 	std.Output(2, fmt.Sprintln(v...))
 	os.Exit(1)
 }
