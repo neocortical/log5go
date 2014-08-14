@@ -1,4 +1,4 @@
-// This file contains source code taken from the Go source code.
+// This file contains code taken from the Go source code.
 // Copyright from original file included here:
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
