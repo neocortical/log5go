@@ -32,7 +32,7 @@ func (b *logBuilder) WithTimeFmt(format string) LogBuilder {
 	return b
 }
 
-// Select the console appender. You must select an appender only once.
+// Select the console appender set to stdout. You must select an appender only once.
 // You must select an appender prior to configuring it.
 func (b *logBuilder) ToStdout() LogBuilder {
 	if b.appender != nil {
@@ -41,6 +41,18 @@ func (b *logBuilder) ToStdout() LogBuilder {
 	}
 
 	b.appender = &consoleAppender{os.Stdout, nil}
+	return b
+}
+
+// Select the console appender set to stderr. You must select an appender only once.
+// You must select an appender prior to configuring it.
+func (b *logBuilder) ToStderr() LogBuilder {
+	if b.appender != nil {
+		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
+		return b
+	}
+
+	b.appender = &consoleAppender{os.Stderr, nil}
 	return b
 }
 

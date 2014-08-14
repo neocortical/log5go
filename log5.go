@@ -18,6 +18,7 @@ type Log5Go interface {
 type LogBuilder interface {
 	WithTimeFmt(format string) LogBuilder
 	ToStdout() LogBuilder
+	ToStderr() LogBuilder
 	ToFile(directory string, filename string) LogBuilder
 	ToAppender(appender Appender) LogBuilder
 	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder

@@ -58,12 +58,38 @@ func TestToStdout(t *testing.T) {
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
+	if a.dest != os.Stdout {
+		t.Errorf("consoleAppender to stdout expected but was %v", a.dest)
+	}
 	if a.errDest != nil {
-		t.Errorf("consoleAppender stderr expected nil but was %v", a.errDest)
+		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
 	}
 
 	// setting twice should result in error
 	lb = Log(LogAll).ToStdout().ToStdout()
+	b, _ = lb.(*logBuilder)
+	if !b.errs.hasErrors() {
+		t.Error("expected errors after setting appender twice but got none")
+	}
+}
+
+func TestToStderr(t *testing.T) {
+	lb := Log(LogAll).ToStderr()
+	b, _ := lb.(*logBuilder)
+
+	a, ok := b.appender.(*consoleAppender)
+	if !ok {
+		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
+	}
+	if a.dest != os.Stderr {
+		t.Errorf("consoleAppender to stderr expected but was %v", a.dest)
+	}
+	if a.errDest != nil {
+		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
+	}
+
+	// setting twice should result in error
+	lb = Log(LogAll).ToStderr().ToStderr()
 	b, _ = lb.(*logBuilder)
 	if !b.errs.hasErrors() {
 		t.Error("expected errors after setting appender twice but got none")
