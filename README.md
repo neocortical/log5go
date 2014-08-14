@@ -7,6 +7,7 @@ Very loosely based on the (in)famous log4j Java logging library, but uncluttered
 
 Why 5? Because there are already about a squillion log4go projects on Github and I wanted to take it to the next level!
 
+[![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go)
 
 Install
 =======
