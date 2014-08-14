@@ -45,7 +45,7 @@ func (b *logBuilder) ToStdout() LogBuilder {
 		return b
 	}
 
-	b.appender = &consoleAppender{os.Stdout, nil}
+	b.appender = &writerAppender{dest: os.Stdout, errDest: nil}
 	return b
 }
 
@@ -57,7 +57,7 @@ func (b *logBuilder) ToStderr() LogBuilder {
 		return b
 	}
 
-	b.appender = &consoleAppender{os.Stderr, nil}
+	b.appender = &writerAppender{dest: os.Stderr, errDest: nil}
 	return b
 }
 
@@ -70,7 +70,7 @@ func (b *logBuilder) ToWriter(out io.Writer) LogBuilder {
 		return b
 	}
 
-	b.appender = &consoleAppender{out, nil}
+	b.appender = &writerAppender{dest: out, errDest: nil}
 	return b
 }
 
@@ -169,8 +169,8 @@ func (b *logBuilder) WithStderr() LogBuilder {
 		return b
 	}
 
-	a, isConsoleAppender := b.appender.(*consoleAppender)
-	if !isConsoleAppender {
+	a, iswriterAppender := b.appender.(*writerAppender)
+	if !iswriterAppender {
 		b.errs.append(fmt.Errorf("appender not set to console appender"))
 		return b
 	}

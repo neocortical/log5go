@@ -143,12 +143,14 @@ func (l *logger) formatHeader(buf *[]byte, t time.Time, file string, line int) {
 
 func (l *logger) SetOutput(out io.Writer) {
 	l.lock.Lock()
-	a, ok := l.appender.(*consoleAppender)
+	a, ok := l.appender.(*writerAppender)
 	if !ok {
-		l.appender = &consoleAppender{out, nil}
+		l.appender = &writerAppender{dest: out, errDest: nil}
 	} else {
+		a.lock.Lock()
 		a.dest = out
 		a.errDest = nil
+		a.lock.Unlock()
 	}
 	l.lock.Unlock()
 }

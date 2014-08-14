@@ -55,15 +55,15 @@ func TestToStdout(t *testing.T) {
 	lb := Log(LogAll).ToStdout()
 	b, _ := lb.(*logBuilder)
 
-	a, ok := b.appender.(*consoleAppender)
+	a, ok := b.appender.(*writerAppender)
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
 	if a.dest != os.Stdout {
-		t.Errorf("consoleAppender to stdout expected but was %v", a.dest)
+		t.Errorf("writerAppender to stdout expected but was %v", a.dest)
 	}
 	if a.errDest != nil {
-		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
+		t.Errorf("writerAppender stderr split expected nil but was %v", a.errDest)
 	}
 
 	// setting twice should result in error
@@ -78,15 +78,15 @@ func TestToStderr(t *testing.T) {
 	lb := Log(LogAll).ToStderr()
 	b, _ := lb.(*logBuilder)
 
-	a, ok := b.appender.(*consoleAppender)
+	a, ok := b.appender.(*writerAppender)
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
 	if a.dest != os.Stderr {
-		t.Errorf("consoleAppender to stderr expected but was %v", a.dest)
+		t.Errorf("writerAppender to stderr expected but was %v", a.dest)
 	}
 	if a.errDest != nil {
-		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
+		t.Errorf("writerAppender stderr split expected nil but was %v", a.errDest)
 	}
 
 	// setting twice should result in error
@@ -102,15 +102,15 @@ func TestToWriter(t *testing.T) {
 	lb := Log(LogAll).ToWriter(out)
 	b, _ := lb.(*logBuilder)
 
-	a, ok := b.appender.(*consoleAppender)
+	a, ok := b.appender.(*writerAppender)
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
 	if a.dest != out {
-		t.Errorf("consoleAppender to writer expected but was %v", a.dest)
+		t.Errorf("writerAppender to writer expected but was %v", a.dest)
 	}
 	if a.errDest != nil {
-		t.Errorf("consoleAppender stderr split expected nil but was %v", a.errDest)
+		t.Errorf("writerAppender stderr split expected nil but was %v", a.errDest)
 	}
 
 	// setting twice should result in error
@@ -125,12 +125,12 @@ func TestWithStdErr(t *testing.T) {
 	lb := Log(LogAll).ToStdout().WithStderr()
 	b, _ := lb.(*logBuilder)
 
-	a, ok := b.appender.(*consoleAppender)
+	a, ok := b.appender.(*writerAppender)
 	if !ok {
 		t.Errorf("Expected console appender but got %v", reflect.TypeOf(b.appender))
 	}
 	if a.errDest != os.Stderr {
-		t.Errorf("consoleAppender stderr expected but was %v", a.errDest)
+		t.Errorf("writerAppender stderr expected but was %v", a.errDest)
 	}
 }
 
@@ -232,7 +232,7 @@ func TestBuild(t *testing.T) {
 	if l.level != LogInfo {
 		t.Errorf("expected log level %d but got %d", LogInfo, l.level)
 	}
-	a, ok := l.appender.(*consoleAppender)
+	a, ok := l.appender.(*writerAppender)
 	if !ok {
 		t.Error("built logger's appender should be console but isn't")
 	}
@@ -324,7 +324,7 @@ func TestBuildWithWriter(t *testing.T) {
 		t.Errorf("expected no errors but got %v", err)
 	}
 	l, _ := log.(*logger)
-	a, ok := l.appender.(*consoleAppender)
+	a, ok := l.appender.(*writerAppender)
 	if !ok {
 		t.Errorf("expected console appender but got %v", reflect.TypeOf(l.appender))
 	}
