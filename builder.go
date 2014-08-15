@@ -10,18 +10,20 @@ import (
 )
 
 type logBuilder struct {
-	level      LogLevel
-	appender   Appender
-	timeFormat string
-	prefix     string
-	lines      int
-	errs       *compositeError
+	level       LogLevel
+	formatter   Formatter
+	appender    Appender
+	timeFormat  string
+	prefix      string
+	lines       int
+	errs        *compositeError
 }
 
 // Entry point for building a new logger. Start here. Takes the desired log level.
 func Log(level LogLevel) LogBuilder {
 	builder := logBuilder{
 		level: level,
+		formatter: nil,
 		appender: nil,
 		timeFormat: TF_GoStd,
 		prefix: "",
@@ -76,16 +78,19 @@ func (b *logBuilder) ToWriter(out io.Writer) LogBuilder {
 
 func (b *logBuilder) WithPrefix(prefix string) LogBuilder {
 	b.prefix = prefix
+
 	return b
 }
 
 func (b *logBuilder) WithLine() LogBuilder {
 	b.lines = Llongfile
+
 	return b
 }
 
 func (b *logBuilder) WithLn()  LogBuilder {
 	b.lines = Lshortfile
+
 	return b
 }
 
@@ -179,6 +184,11 @@ func (b *logBuilder) WithStderr() LogBuilder {
 	return b
 }
 
+func (b *logBuilder) WithFmt(format string) LogBuilder {
+	b.formatter = NewStringFormatter(format)
+	return b
+}
+
 // Build the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build process.
 func (b *logBuilder) Build() (_ Log5Go, _ error) {
@@ -192,6 +202,7 @@ func (b *logBuilder) Build() (_ Log5Go, _ error) {
 
 	logger := logger{
 		level: b.level,
+		formatter: b.formatter,
 		appender: b.appender,
 		timeFormat: b.timeFormat,
 		prefix: b.prefix,

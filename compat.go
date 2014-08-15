@@ -121,10 +121,10 @@ func Flags() int {
 
 func (l *logger) SetFlags(flag int) {
 	l.lock.Lock()
+	defer l.lock.Unlock()
 	l.timeFormat = parseTimeFmt(flag)
 	l.lines = parseLines(flag)
 	l.flag = flag
-	l.lock.Unlock()
 }
 
 // SetFlags sets the flags on the default logger

@@ -32,6 +32,8 @@ type LogBuilder interface {
 	WithPrefix(prefix string) LogBuilder
 	WithLine() LogBuilder
 	WithLn() LogBuilder
+	// With a custom string format
+	WithFmt(format string) LogBuilder
 	// WithLayout(pattern string) LogBuilder // TODO
 	Build() (Log5Go, error)
 	Register(key string) (Log5Go, error)

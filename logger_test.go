@@ -3,8 +3,24 @@ package log5go
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
+)
+
+const (
+	Rxdate         					= `[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]`
+	Rxtime         					= `[0-9][0-9]:[0-9][0-9]:[0-9][0-9]`
+	Rxlevel									= `(TRACE|DEBUG|INFO|WARN|ERROR|FATAL|CUSTOM)`
+	Rxprefix								= `prefix`
+	Rxcaller								= `[a-zA-Z0-9_\-\/\.]+\.go`
+	Rxline									= `[0-9]+`
+	RxdefaultFmt						= Rxdate + " " + Rxtime + " " + Rxlevel + " : " + Rxmessage
+	RxdefaultPrefixFmt 			= Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ": " + Rxmessage
+	RxdefaultLinesFmt 			= Rxdate + " " + Rxtime + " " + Rxlevel + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
+	RxdefaultPrefixLinesFmt = Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
+	Rxmessage								= `hello, world`
+	Rxcustomformat 					= Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
 )
 
 func TestOutputOfMultipleLines(t *testing.T) {
@@ -21,6 +37,53 @@ func TestOutputOfMultipleLines(t *testing.T) {
 	expected := fmt.Sprintf("%d TRACE : foo: 1\n%d DEBUG : bar: 2\n%d INFO : baz: 3\n%d WARN : qux: 4\n%d ERROR : quux: 5\n%d FATAL : corge: 6\n", year, year, year, year, year, year)
 	if a.buf.String() != expected {
 		t.Errorf("unexpected log output. expected \n%s\n ...but got \n%s", expected, a.buf.String())
+	}
+}
+
+func TestDefaultFormats(t *testing.T) {
+	var buf bytes.Buffer
+	log, err := Log(LogAll).ToWriter(&buf).Build()
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
+	}
+	runTest(log, &buf, RxdefaultFmt, t)
+
+	log, err = Log(LogAll).ToWriter(&buf).WithLn().Build()
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
+	}
+	runTest(log, &buf, RxdefaultLinesFmt, t)
+
+	log, err = Log(LogAll).ToWriter(&buf).WithPrefix("prefix").Build()
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
+	}
+	runTest(log, &buf, RxdefaultPrefixFmt, t)
+
+	log, err = Log(LogAll).ToWriter(&buf).WithPrefix("prefix").WithLine().Build()
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
+	}
+	runTest(log, &buf, RxdefaultPrefixLinesFmt, t)
+}
+
+
+func TestCustomFormat(t *testing.T) {
+	var buf bytes.Buffer
+	log, err := Log(LogAll).ToWriter(&buf).WithPrefix("prefix").WithFmt("%m, %p, %l!!!").Build()
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
+	}
+	runTest(log, &buf, Rxcustomformat, t)
+}
+
+func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {
+	buf.Reset()
+	log.Info("hello, world")
+	fmt = `^` + fmt + "\n$"
+	matched, err := regexp.MatchString(fmt, buf.String())
+	if err != nil || !matched {
+		t.Errorf("expected \n%s but got \n%s", fmt, buf.String())
 	}
 }
 

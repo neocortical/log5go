@@ -4,21 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
-	"strconv"
 	"sync"
 	"time"
 )
 
 // Inner type of all loggers
 type logger struct {
-	lock       sync.Mutex
-	level      LogLevel
-	appender   Appender
-	timeFormat string
-	prefix     string
-	lines      int
-	flag       int 				// needed to return by Flags()
-	buf        []byte     // for accumulating text to write
+	lock        sync.Mutex
+	level       LogLevel
+	formatter   Formatter
+	appender    Appender
+	timeFormat  string
+	prefix      string
+	lines       int
+	flag        int 				// needed to return by Flags()
+	buf         []byte     	// for accumulating text to write
 }
 
 var std = initStd()
@@ -69,7 +69,7 @@ func (l *logger) SetLogLevel(level LogLevel) {
 	l.level = level
 }
 
-func (l *logger) log(t time.Time, level LogLevel, calldepth int, s string) error {
+func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string) error {
 	now := time.Now() // get this early.
 	var file string
 	var line int
@@ -91,36 +91,7 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, s string) error
 			line = 0
 		}
 		l.lock.Lock()
-	}
 
-	l.buf = l.buf[:0]
-	l.formatHeader(&l.buf, now, level, file, line)
-	l.buf = append(l.buf, s...) // TODO: Appender should take []byte
-	if len(s) > 0 && s[len(s)-1] != '\n' {
-		l.buf = append(l.buf, '\n')
-	}
-
-	l.appender.Append(string(l.buf), level, now)
-	return nil // TODO: Appender should return error
-}
-
-func (l *logger) formatHeader(buf *[]byte, t time.Time, level LogLevel, file string, line int) {
-	if l.timeFormat != "" {
-		*buf = append(*buf, t.Format(l.timeFormat)...)
-		*buf = append(*buf, ' ')
-	}
-
-	levelString := GetLogLevelString(level)
-	if levelString != "" {
-		*buf = append(*buf, levelString...)
-		*buf = append(*buf, ' ')
-	}
-
-	if l.prefix != "" {
-		*buf = append(*buf, l.prefix...)
-	}
-
-	if l.lines&(Lshortfile|Llongfile) != 0 {
 		if l.lines == Lshortfile {
 			short := file
 			for i := len(file) - 1; i > 0; i-- {
@@ -131,19 +102,52 @@ func (l *logger) formatHeader(buf *[]byte, t time.Time, level LogLevel, file str
 			}
 			file = short
 		}
-
-		if len(*buf) > 0 && (*buf)[len(*buf) - 1] != ' ' {
-			*buf = append(*buf, ' ')
-		}
-		*buf = append(*buf, '(')
-		*buf = append(*buf, file...)
-		*buf = append(*buf, ':')
-		*buf = append(*buf, strconv.FormatUint(uint64(line), 10)...)
-		*buf = append(*buf, ')')
 	}
 
-	// if no header info has been added, we don't print the separator
-	if len(*buf) > 0 {
-		*buf = append(*buf, ": "...)
+	timeString := ""
+	if l.timeFormat != "" {
+		timeString = now.Format(l.timeFormat)
+	}
+	levelString := GetLogLevelString(level)
+
+	var logMessage []byte
+	if l.formatter != nil {
+		logMessage = l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg)
+	} else {
+		logMessage = l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg)
+	}
+	if len(logMessage) == 0 || logMessage[len(logMessage) - 1] != '\n' {
+		logMessage = append(logMessage, '\n')
+	}
+
+	l.appender.Append(string(logMessage), level, now)
+	return nil // TODO: Appender should return error
+}
+
+func (l *logger) getDefaultFormat() Formatter {
+	if l.timeFormat == "" {
+		if l.lines != 0 {
+			if l.prefix != "" {
+				return fmtTimePrefixLines
+			} else {
+				return fmtNotimeLines
+			}
+		} else if l.prefix != "" {
+			return fmtNotimePrefix
+		} else {
+			return fmtNone
+		}
+	} else {
+		if l.lines != 0 {
+			if l.prefix != "" {
+				return fmtTimePrefixLines
+			} else {
+				return fmtTimeLines
+			}
+		} else if l.prefix != "" {
+			return fmtTimePrefix
+		} else {
+			return fmtTime
+		}
 	}
 }
