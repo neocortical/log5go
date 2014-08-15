@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -88,57 +87,7 @@ func New(out io.Writer, prefix string, flag int) Log5Go {
 }
 
 func (l *logger) Output(calldepth int, s string) error {
-	now := time.Now() // get this early.
-	var file string
-	var line int
-
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
-	if l.lines != 0 {
-		// release lock while getting caller info - it's expensive.
-		l.lock.Unlock()
-		var ok bool
-		_, file, line, ok = runtime.Caller(calldepth)
-		if !ok {
-			file = "???"
-			line = 0
-		}
-		l.lock.Lock()
-	}
-
-	l.buf = l.buf[:0]
-	l.formatHeader(&l.buf, now, file, line)
-	l.buf = append(l.buf, s...) // TODO: Appender should take []byte
-	if len(s) > 0 && s[len(s)-1] != '\n' {
-		l.buf = append(l.buf, '\n')
-	}
-
-	// TODO: proper log levels for Output() from GoFatal, GoPanic
-	l.appender.Append(string(l.buf), LogInfo, now)
-	return nil // TODO: Appender should return error
-}
-
-func (l *logger) formatHeader(buf *[]byte, t time.Time, file string, line int) {
-	*buf = append(*buf, l.prefix...)
-	if l.timeFormat != "" {
-		*buf = append(*buf, t.Format(l.timeFormat)...)
-		*buf = append(*buf, ' ')
-	}
-
-	if l.lines&(Lshortfile|Llongfile) != 0 {
-		if l.lines == Lshortfile {
-			short := file
-			for i := len(file) - 1; i > 0; i-- {
-				if file[i] == '/' {
-					short = file[i+1:]
-					break
-				}
-			}
-			file = short
-		}
-		*buf = append(*buf, fmt.Sprintf("%s:%d: ", file, line)...)
-	}
+	return l.log(time.Now(), LogInfo, calldepth + 1, s)
 }
 
 func (l *logger) SetOutput(out io.Writer) {
@@ -206,101 +155,101 @@ func SetPrefix(prefix string) {
 }
 
 func (l *logger) Printf(format string, v ...interface{}) {
-	l.Output(2, fmt.Sprintf(format, v...))
+	l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, v...))
 }
 
 func (l *logger) Print(v ...interface{}) {
-	l.Output(2, fmt.Sprint(v...))
+	l.log(time.Now(), LogInfo, 2, fmt.Sprint(v...))
 }
 
 func (l *logger) Println(v ...interface{}) {
-	l.Output(2, fmt.Sprintln(v...))
+	l.log(time.Now(), LogInfo, 2, fmt.Sprintln(v...))
 }
 
 func (l *logger) GoFatal(v ...interface{}) {
-	l.Output(2, fmt.Sprint(v...))
+	l.log(time.Now(), LogFatal, 2, fmt.Sprint(v...))
 	os.Exit(1)
 }
 
 func (l *logger) GoFatalf(format string, v ...interface{}) {
-	l.Output(2, fmt.Sprintf(format, v...))
+	l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...))
 	os.Exit(1)
 }
 
 func (l *logger) GoFatalln(v ...interface{}) {
-	l.Output(2, fmt.Sprintln(v...))
+	l.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...))
 	os.Exit(1)
 }
 
 func (l *logger) GoPanic(v ...interface{}) {
 	s := fmt.Sprint(v...)
-	l.Output(2, s)
+	l.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 
 func (l *logger) GoPanicf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
-	l.Output(2, s)
+	l.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 
 func (l *logger) GoPanicln(v ...interface{}) {
 	s := fmt.Sprintln(v...)
-	l.Output(2, s)
+	l.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 
 // Print calls Print on the default logger
 func Print(v ...interface{}) {
-	std.Output(2, fmt.Sprint(v...))
+	std.log(time.Now(), LogInfo, 2, fmt.Sprint(v...))
 }
 
 // Printf calls Printf on the default logger
 func Printf(format string, v ...interface{}) {
-	std.Output(2, fmt.Sprintf(format, v...))
+	std.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, v...))
 }
 
 // Println calls Println on the default logger
 func Println(v ...interface{}) {
-	std.Output(2, fmt.Sprintln(v...))
+	std.log(time.Now(), LogInfo, 2, fmt.Sprintln(v...))
 }
 
 // GoFatal calls GoFatal on the default logger
 func GoFatal(v ...interface{}) {
-	std.Output(2, fmt.Sprint(v...))
+	std.log(time.Now(), LogFatal, 2, fmt.Sprint(v...))
 	os.Exit(1)
 }
 
 // GoFatalf calls GoFatalf on the default logger
 func GoFatalf(format string, v ...interface{}) {
-	std.Output(2, fmt.Sprintf(format, v...))
+	std.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...))
 	os.Exit(1)
 }
 
 // GoFatalln calls GoFatalln on the default logger
 func GoFatalln(v ...interface{}) {
-	std.Output(2, fmt.Sprintln(v...))
+	std.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...))
 	os.Exit(1)
 }
 
 // GoPanic calls GoPanic on the default logger
 func GoPanic(v ...interface{}) {
 	s := fmt.Sprint(v...)
-	std.Output(2, s)
+	std.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 
 // GoPanicf calls GoPanicf on the default logger
 func GoPanicf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
-	std.Output(2, s)
+	std.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 
 // GoPanicln calls GoPanicln on the default logger
 func GoPanicln(v ...interface{}) {
 	s := fmt.Sprintln(v...)
-	std.Output(2, s)
+	std.log(time.Now(), LogFatal, 2, s)
 	panic(s)
 }
 

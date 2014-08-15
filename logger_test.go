@@ -18,7 +18,7 @@ func TestOutputOfMultipleLines(t *testing.T) {
 	l.Fatal("corge: %d", 6)
 
 	a, _ := l.appender.(*bufferAppender)
-	expected := fmt.Sprintf("%d TRACE: foo: 1\n%d DEBUG: bar: 2\n%d INFO: baz: 3\n%d WARN: qux: 4\n%d ERROR: quux: 5\n%d FATAL: corge: 6\n", year, year, year, year, year, year)
+	expected := fmt.Sprintf("%d TRACE : foo: 1\n%d DEBUG : bar: 2\n%d INFO : baz: 3\n%d WARN : qux: 4\n%d ERROR : quux: 5\n%d FATAL : corge: 6\n", year, year, year, year, year, year)
 	if a.buf.String() != expected {
 		t.Errorf("unexpected log output. expected \n%s\n ...but got \n%s", expected, a.buf.String())
 	}

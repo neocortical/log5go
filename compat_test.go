@@ -16,12 +16,14 @@ import (
 )
 
 const (
+	Rsep          = `: `
+	Rlevel        = `INFO `
 	Rdate         = `[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]`
 	Rtime         = `[0-9][0-9]:[0-9][0-9]:[0-9][0-9]`
 	Rmicroseconds = `\.[0-9][0-9][0-9][0-9][0-9][0-9]`
-	Rline         = `(56|58):` // must update if the calls to l.Printf / l.Print below move
-	Rlongfile     = `.*/[A-Za-z0-9_\-]+\.go:` + Rline
-	Rshortfile    = `[A-Za-z0-9_\-]+\.go:` + Rline
+	Rline         = `(58|60)` // must update if the calls to l.Printf / l.Print below move
+	Rlongfile     = `\(.*/[A-Za-z0-9_\-]+\.go:` + Rline + `\)`
+	Rshortfile    = `\([A-Za-z0-9_\-]+\.go:` + Rline + `\)`
 )
 
 type tester struct {
@@ -32,18 +34,18 @@ type tester struct {
 
 var tests = []tester{
 	// individual pieces:
-	{0, "", ""},
-	{0, "XXX", "XXX"},
-	{Ldate, "", Rdate + " "},
-	{Ltime, "", Rtime + " "},
-	{Ltime | Lmicroseconds, "", Rtime + Rmicroseconds + " "},
-	{Lmicroseconds, "", Rtime + Rmicroseconds + " "}, // microsec implies time
-	{Llongfile, "", Rlongfile + " "},
-	{Lshortfile, "", Rshortfile + " "},
-	{Llongfile | Lshortfile, "", Rshortfile + " "}, // shortfile overrides longfile
+	{0, "", Rlevel + Rsep},
+	{0, "XXX", Rlevel + "XXX" + Rsep},
+	{Ldate, "", Rdate + " " + Rlevel + Rsep},
+	{Ltime, "", Rtime + " " + Rlevel + Rsep},
+	{Ltime | Lmicroseconds, "", Rtime + Rmicroseconds + " " + Rlevel + Rsep},
+	{Lmicroseconds, "", Rtime + Rmicroseconds + " " + Rlevel + Rsep}, // microsec implies time
+	{Llongfile, "", Rlevel + Rlongfile + Rsep},
+	{Lshortfile, "", Rlevel + Rshortfile + Rsep},
+	{Llongfile | Lshortfile, "", Rlevel + Rshortfile + Rsep}, // shortfile overrides longfile
 	// everything at once:
-	{Ldate | Ltime | Lmicroseconds | Llongfile, "XXX", "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " "},
-	{Ldate | Ltime | Lmicroseconds | Lshortfile, "XXX", "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " "},
+	{Ldate | Ltime | Lmicroseconds | Llongfile, "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rlevel + "XXX" + " " + Rlongfile + Rsep},
+	{Ldate | Ltime | Lmicroseconds | Lshortfile, "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rlevel + "XXX" + " " + Rshortfile + Rsep},
 }
 
 // Test using Println("hello", 23, "world") or using Printf("hello %d world", 23)
@@ -82,7 +84,7 @@ func TestOutput(t *testing.T) {
 	var b bytes.Buffer
 	l := New(&b, "", 0)
 	l.Println(testString)
-	if expect := testString + "\n"; b.String() != expect {
+	if expect := "INFO : " + testString + "\n"; b.String() != expect {
 		t.Errorf("log output should match %q is %q", expect, b.String())
 	}
 }
@@ -110,12 +112,12 @@ func TestFlagAndPrefixSetting(t *testing.T) {
 	}
 	// Verify a log message looks right, with our prefix and microseconds present.
 	l.Print("hello")
-	pattern := "^Reality:" + Rdate + " " + Rtime + Rmicroseconds + " hello\n"
+	pattern := "^" + Rdate + " " + Rtime + Rmicroseconds + " " + Rlevel + "Reality:: hello\n"
 	matched, err := regexp.Match(pattern, b.Bytes())
 	if err != nil {
 		t.Fatalf("pattern %q did not compile: %s", pattern, err)
 	}
 	if !matched {
-		t.Error("message did not match pattern")
+		t.Errorf("message %s did not match pattern %v", b.String(), pattern)
 	}
 }
