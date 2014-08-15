@@ -5,7 +5,7 @@ import (
 )
 
 func TestPutAndGet(t *testing.T) {
-	log, _ := Log(LogAll).ToStdout().Build()
+	log := Logger(LogAll).ToStdout()
 
 	err := loggerRegistry.Put("foo", log)
 	if err != nil {

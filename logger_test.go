@@ -42,38 +42,23 @@ func TestOutputOfMultipleLines(t *testing.T) {
 
 func TestDefaultFormats(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := Log(LogAll).ToWriter(&buf).Build()
-	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
-	}
+	log := Logger(LogAll).ToWriter(&buf)
 	runTest(log, &buf, RxdefaultFmt, t)
 
-	log, err = Log(LogAll).ToWriter(&buf).WithLn().Build()
-	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
-	}
+	log = Logger(LogAll).ToWriter(&buf).WithLn()
 	runTest(log, &buf, RxdefaultLinesFmt, t)
 
-	log, err = Log(LogAll).ToWriter(&buf).WithPrefix("prefix").Build()
-	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
-	}
+	log = Logger(LogAll).ToWriter(&buf).WithPrefix("prefix")
 	runTest(log, &buf, RxdefaultPrefixFmt, t)
 
-	log, err = Log(LogAll).ToWriter(&buf).WithPrefix("prefix").WithLine().Build()
-	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
-	}
+	log = Logger(LogAll).ToWriter(&buf).WithPrefix("prefix").WithLine()
 	runTest(log, &buf, RxdefaultPrefixLinesFmt, t)
 }
 
 
 func TestCustomFormat(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := Log(LogAll).ToWriter(&buf).WithPrefix("prefix").WithFmt("%m, %p, %l!!!").Build()
-	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
-	}
+	log := Logger(LogAll).ToWriter(&buf).WithPrefix("prefix").WithFmt("%m, %p, %l!!!")
 	runTest(log, &buf, Rxcustomformat, t)
 }
 

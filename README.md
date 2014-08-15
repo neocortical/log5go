@@ -28,32 +28,32 @@ import l5g "github.com/neocortical/log5go"
 Examples
 ========
 
-A simple console logger
------------------------
+A simple console logger (defaults to stderr)
+--------------------------------------------
 
 ```go
 
-log, err := l5g.Log(l5g.LogAll).ToStdout().Build()
+log := l5g.Logger(l5g.LogAll)
 log.Info("Hello, World. My PID is %d", os.Getpid())
 
 ```
 
-A logger with a custom time format
-----------------------------------
+A logger to stdout with a custom time format
+--------------------------------------------
 
 ```go
 
-log, err = l5g.Log(l5g.LogDebug).ToStdout().WithTimeFmt("Jan _2 15:04:05").Build()
+log = l5g.Logger(l5g.LogDebug).ToStdout().WithTimeFmt("Jan _2 15:04:05")
 log.Info("Hello, World. My PID is %d", os.Getpid())
 
 ```
 
-A console logger that writes errors to stderr
----------------------------------------------
+A console logger that writes to stdout but sends errors to stderr
+-----------------------------------------------------------------
 
 ```go
 
-log, err = l5g.Log(l5g.LogAll).ToStdout().WithStderr().Build()
+log = l5g.Logger(l5g.LogAll).ToStdout().WithStderr()
 log.Info("Trace, debug, and info go to stdout")
 log.Error("Warn, error, and fatal go to stderr")
 
@@ -64,7 +64,7 @@ A simple file logger
 
 ```go
 
-log, err = l5g.Log(l5g.LogInfo).ToFile("/tmp", "foo.log").Build()
+log = l5g.Logger(l5g.LogInfo).ToFile("/tmp", "foo.log")
 log.Info("Hello, World. My PID is %d", os.Getpid())
 
 ```
@@ -74,8 +74,18 @@ A rolling file appender
 
 ```go
 
-log, err = l5g.Log(l5g.LogDebug).ToFile("/tmp", "foo.log").WithRotation(l5g.RollDaily, 7).Build()
+log = l5g.Logger(l5g.LogDebug).ToFile("/tmp", "foo.log").WithRotation(l5g.RollDaily, 7)
 log.Info("Hello, World. My PID is %d", os.Getpid())
+
+```
+
+Custom log output format
+------------------------
+
+```go
+
+log = l5g.Logger(l5g.LogDebug).WithFmt("%m") // message only
+log.Info("He hates these cans!")
 
 ```
 
@@ -85,7 +95,7 @@ Using the internal registry
 ```go
 
 // In mypkg/foo.go
-log, err := l5g.Log(l5g.LogDebug).ToFile("/tmp", "mypkg.log").Register("mypkg/mainlog")
+log, err := l5g.Logger(l5g.LogDebug).ToFile("/tmp", "mypkg.log").Register("mypkg/mainlog")
 log.Info("Hello from file foo.go")
 
 // In mypkg/bar.go
@@ -107,7 +117,7 @@ var LLCustomInfo l5g.LogLevel = l5g.LogInfo + 2
 
 l5g.RegisterLogLevel(LLCustomInfo, "CUSTOM_INFO") // optional
 
-log, err = l5g.Log(LLCustomLogLevel).ToStdout().Build()
+log = l5g.Logger(LLCustomLogLevel)
 
 log.Log(LLCustomDebug, "Won't see this: priority too low")
 log.Info("Won't see this either")
@@ -146,7 +156,7 @@ dealt with. Here are the steps to upgrade from the standard log package to Log5G
 Log Format
 ==========
 
-The default output format for log messages (custom formats coming soon!) consists the following
+The default output format for log messages consists the following
 ordering of elements: timestamp, level, prefix, caller:line, message. Depending on how
 you set up your logger, not all of these elements will be present. Here are some examples of
 log output:
@@ -168,7 +178,7 @@ log output:
 # No level string for level:
 2009/01/23 01:23:23 : And a cup built right in.
 
-# No nothing:
+# No nothing (.WithFmt("%m")):
 He hates these cans! Stay away from the cans!
 
 ```
@@ -179,9 +189,8 @@ Go's stdlib log functions print at level INFO and GoPanic() and GoFatal() print 
 TODO
 ====
 
-* More testing. There's coverage for time (including DST rotation issues), log builder, and regsistry, but need more.
-* Custom layouts (pattern, JSON, HTML, etc.)
-* syslog support (better than Go's native support, about which even Go authors just shake their heads)
+* Structured layouts (JSON, HTML, etc.)
+* syslog support (better than Go's native support)
 * log chaining
 
 

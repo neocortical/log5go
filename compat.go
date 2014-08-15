@@ -66,18 +66,16 @@ type GoLogger interface {
 
 // New creates a new Log5Go with the desired Go stdlib log settings
 func New(out io.Writer, prefix string, flag int) Log5Go {
-	b := Log(LogAll).ToWriter(out).WithTimeFmt(parseTimeFmt(flag))
+	l := Logger(LogAll).ToWriter(out).WithTimeFmt(parseTimeFmt(flag))
 	if prefix != "" {
-		b = b.WithPrefix(prefix)
+		l = l.WithPrefix(prefix)
 	}
 	lines := parseLines(flag)
 	if lines == Lshortfile {
-		b = b.WithLn()
+		l = l.WithLn()
 	} else if lines == Llongfile {
-		b = b.WithLine()
+		l = l.WithLine()
 	}
-
-	l, _ := b.Build()
 
 	// HACKY: need to set flags directly on the underlying struct
 	logger, _ := l.(*logger)

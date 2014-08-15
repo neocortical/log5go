@@ -18,13 +18,12 @@ type logger struct {
 	prefix      string
 	lines       int
 	flag        int 				// needed to return by Flags()
-	buf         []byte     	// for accumulating text to write
 }
 
 var std = initStd()
 
 func initStd() (_ *logger) {
-	log, _ := Log(LogAll).ToStderr().WithTimeFmt(TF_GoStd).Build()
+	log := Logger(LogAll).ToStderr().WithTimeFmt(TF_GoStd)
 	l, _ := log.(*logger)
 	return l
 }

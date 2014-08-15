@@ -1,7 +1,6 @@
 package log5go
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -9,116 +8,96 @@ import (
 	"time"
 )
 
-type logBuilder struct {
-	level       LogLevel
-	formatter   Formatter
-	appender    Appender
-	timeFormat  string
-	prefix      string
-	lines       int
-	errs        *compositeError
-}
-
 // Entry point for building a new logger. Start here. Takes the desired log level.
-func Log(level LogLevel) LogBuilder {
-	builder := logBuilder{
+func Logger(level LogLevel) Log5Go {
+	logger := logger{
 		level: level,
 		formatter: nil,
-		appender: nil,
+		appender: &writerAppender{dest: os.Stderr, errDest: nil},
 		timeFormat: TF_GoStd,
 		prefix: "",
 		lines: 0,
-		errs: newCompositeError(),
 	}
-	return &builder
+	return &logger
 }
 
 // Add a custom format to the logger
-func (b *logBuilder) WithTimeFmt(format string) LogBuilder {
-	b.timeFormat = format
-	return b
+func (l *logger) WithTimeFmt(format string) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.timeFormat = format
+	return l
 }
 
 // Select the console appender set to stdout. You must select an appender only once.
 // You must select an appender prior to configuring it.
-func (b *logBuilder) ToStdout() LogBuilder {
-	if b.appender != nil {
-		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
-		return b
-	}
-
-	b.appender = &writerAppender{dest: os.Stdout, errDest: nil}
-	return b
+func (l *logger) ToStdout() Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.appender = &writerAppender{dest: os.Stdout, errDest: nil}
+	return l
 }
 
 // Select the console appender set to stderr. You must select an appender only once.
 // You must select an appender prior to configuring it.
-func (b *logBuilder) ToStderr() LogBuilder {
-	if b.appender != nil {
-		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
-		return b
-	}
-
-	b.appender = &writerAppender{dest: os.Stderr, errDest: nil}
-	return b
+func (l *logger) ToStderr() Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.appender = &writerAppender{dest: os.Stderr, errDest: nil}
+	return l
 }
 
 // Select the console appender with a custom destination.
 // You must select an appender only once.
 // You must select an appender prior to configuring it.
-func (b *logBuilder) ToWriter(out io.Writer) LogBuilder {
-	if b.appender != nil {
-		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
-		return b
-	}
-
-	b.appender = &writerAppender{dest: out, errDest: nil}
-	return b
+func (l *logger) ToWriter(out io.Writer) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.appender = &writerAppender{dest: out, errDest: nil}
+	return l
 }
 
-func (b *logBuilder) WithPrefix(prefix string) LogBuilder {
-	b.prefix = prefix
-
-	return b
+func (l *logger) WithPrefix(prefix string) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.prefix = prefix
+	return l
 }
 
-func (b *logBuilder) WithLine() LogBuilder {
-	b.lines = Llongfile
-
-	return b
+func (l *logger) WithLine() Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.lines = Llongfile
+	return l
 }
 
-func (b *logBuilder) WithLn()  LogBuilder {
-	b.lines = Lshortfile
-
-	return b
+func (l *logger) WithLn()  Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.lines = Lshortfile
+	return l
 }
 
 // Select the file appender. You must select an appender only once.
 // You must select an appender prior to configuring it.
-func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
-	if b.appender != nil {
-		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
-		return b
-	}
-
+func (l *logger) ToFile(directory string, filename string) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	expandedDir, err := filepath.Abs(directory)
 	if err != nil {
-		b.errs.append(err)
-		return b
+		// would be nice to do *something* on error, but not sure what
+		return l
 	}
 
 	fullFilename := filepath.Join(expandedDir, filename)
 
 	fileAppenderMapLock.Lock()
-	defer fileAppenderMapLock.Unlock()
-
 	var appender *fileAppender = fileAppenderMap[fullFilename]
 	if appender == nil {
 		logfile, err := os.Create(fullFilename)
 		if err != nil {
-			b.errs.append(err)
-			return b
+			fileAppenderMapLock.Unlock()
+			return l
 		}
 		appender = &fileAppender{sync.Mutex{}, logfile, time.Now(), RollNone, SaveAllOldLogs}
 		fileAppenderMap[fullFilename] = appender
@@ -128,101 +107,64 @@ func (b *logBuilder) ToFile(directory string, filename string) LogBuilder {
 		go periodicFileRoller()
 		fileRollerRunning = true
 	}
+	fileAppenderMapLock.Unlock()
 
-	b.appender = appender
-	return b
+	l.appender = appender
+	return l
 }
 
 // ToAppender sets a custom (i.e third-party) appender as the destination for this logger.
 // No other appender setting methods must be called before or after.
-func (b *logBuilder) ToAppender(appender Appender) LogBuilder {
-	if b.appender != nil {
-		b.errs.append(fmt.Errorf("appender cannot be set more than once"))
-		return b
-	}
-
-	b.appender = appender
-	return b
+func (l *logger) ToAppender(appender Appender) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.appender = appender
+	return l
 }
 
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
-func (b *logBuilder) WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder {
-	if b.appender == nil {
-		b.errs.append(fmt.Errorf("appender must be set first"))
-		return b
-	}
+func (l *logger) WithRotation(frequency rollFrequency, keepNLogs int) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-	a, isFileAppender := b.appender.(*fileAppender)
+	a, isFileAppender := l.appender.(*fileAppender)
 	if !isFileAppender {
-		b.errs.append(fmt.Errorf("appender not set to file appender"))
-		return b
+		return l
 	}
 
 	a.nextRollTime = calculateNextRollTime(time.Now(), frequency)
 	a.rollFrequency = frequency
 	a.keepNLogs = keepNLogs
 
-	return b
+	return l
 }
 
 // Send WARN, ERROR, and FATAL messages to stderr. ToConsole() must have been
 // called already.
-func (b *logBuilder) WithStderr() LogBuilder {
-	if b.appender == nil {
-		b.errs.append(fmt.Errorf("appender must be set first"))
-		return b
-	}
+func (l *logger) WithStderr() Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-	a, iswriterAppender := b.appender.(*writerAppender)
+	a, iswriterAppender := l.appender.(*writerAppender)
 	if !iswriterAppender {
-		b.errs.append(fmt.Errorf("appender not set to console appender"))
-		return b
+		return l
 	}
 
 	a.errDest = os.Stderr
-	return b
+	return l
 }
 
-func (b *logBuilder) WithFmt(format string) LogBuilder {
-	b.formatter = NewStringFormatter(format)
-	return b
-}
-
-// Build the logger you have been configuring. Returns the logger, or any errors
-// that have been encountered during the build process.
-func (b *logBuilder) Build() (_ Log5Go, _ error) {
-	if b.appender == nil {
-		b.errs.append(fmt.Errorf("cannot build without appender set"))
-	}
-
-	if b.errs.hasErrors() {
-		return nil, b.errs
-	}
-
-	logger := logger{
-		level: b.level,
-		formatter: b.formatter,
-		appender: b.appender,
-		timeFormat: b.timeFormat,
-		prefix: b.prefix,
-		lines: b.lines,
-	}
-	return &logger, nil
+func (l *logger) WithFmt(format string) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.formatter = NewStringFormatter(format)
+	return l
 }
 
 // Build and register the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build/register process.
-func (b *logBuilder) Register(key string) (_ Log5Go, _ error) {
-	logger, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	err = loggerRegistry.Put(key, logger)
-	if err != nil {
-		return nil, err
-	}
-
-	return logger, nil
+func (l *logger) Register(key string) (_ Log5Go, _ error) {
+	err := loggerRegistry.Put(key, l)
+	return l, err
 }

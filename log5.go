@@ -17,25 +17,24 @@ type Log5Go interface {
 	GetLogLevel() LogLevel
 	SetLogLevel(level LogLevel)
 	GoLogger
+	LogBuilder
 }
 
 // LogBuilder is the interface for building loggers.
 type LogBuilder interface {
-	WithTimeFmt(format string) LogBuilder
-	ToStdout() LogBuilder
-	ToStderr() LogBuilder
-	ToWriter(out io.Writer) LogBuilder
-	ToFile(directory string, filename string) LogBuilder
-	ToAppender(appender Appender) LogBuilder
-	WithRotation(frequency rollFrequency, keepNLogs int) LogBuilder
-	WithStderr() LogBuilder
-	WithPrefix(prefix string) LogBuilder
-	WithLine() LogBuilder
-	WithLn() LogBuilder
+	WithTimeFmt(format string) Log5Go
+	ToStdout() Log5Go
+	ToStderr() Log5Go
+	ToWriter(out io.Writer) Log5Go
+	ToFile(directory string, filename string) Log5Go
+	ToAppender(appender Appender) Log5Go
+	WithRotation(frequency rollFrequency, keepNLogs int) Log5Go
+	WithStderr() Log5Go
+	WithPrefix(prefix string) Log5Go
+	WithLine() Log5Go
+	WithLn() Log5Go
 	// With a custom string format
-	WithFmt(format string) LogBuilder
-	// WithLayout(pattern string) LogBuilder // TODO
-	Build() (Log5Go, error)
+	WithFmt(format string) Log5Go
 	Register(key string) (Log5Go, error)
 }
 
