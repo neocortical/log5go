@@ -18,6 +18,15 @@ type Log5Go interface {
 	SetLogLevel(level LogLevel)
 	GoLogger
 	LogBuilder
+	Log5GoData
+}
+
+// Log5GoData interface allows developers to add custom structured data to log
+// messages with WithData(d Data). WithData() is intended to be called immediately
+// before calling a log method. Developers should not attempt to modify the
+// configuration of a logger after calling WithData().
+type Log5GoData interface {
+  WithData(d Data) Log5Go
 }
 
 // LogBuilder is the interface for building loggers.

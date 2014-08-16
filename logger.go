@@ -33,31 +33,31 @@ var errLowLevel = errors.New("level too low")
 
 // Log a message at the given log level
 func (l *logger) Log(level LogLevel, format string, a ...interface{}) {
-	l.log(time.Now(), level, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), level, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Trace(format string, a ...interface{}) {
-	l.log(time.Now(), LogTrace, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogTrace, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Debug(format string, a ...interface{}) {
-	l.log(time.Now(), LogDebug, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogDebug, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Info(format string, a ...interface{}) {
-	l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Warn(format string, a ...interface{}) {
-	l.log(time.Now(), LogWarn, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogWarn, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Error(format string, a ...interface{}) {
-	l.log(time.Now(), LogError, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogError, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Fatal(format string, a ...interface{}) {
-	l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, a...))
+	l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) GetLogLevel() LogLevel {
@@ -68,7 +68,13 @@ func (l *logger) SetLogLevel(level LogLevel) {
 	l.level = level
 }
 
-func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string) error {
+func (l *logger) WithData(d Data) Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	return &boundLogger{l:l, data:d}
+}
+
+func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, data Data) error {
 	now := time.Now() // get this early.
 	var file string
 	var line int
