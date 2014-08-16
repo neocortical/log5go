@@ -2,7 +2,7 @@ package log5go
 
 
 type Formatter interface {
-	Format(timeString, levelString, prefix, caller string, line uint, msg string) []byte
+	Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data) []byte
 }
 
 // Some constant string formats for convenience, also used internally

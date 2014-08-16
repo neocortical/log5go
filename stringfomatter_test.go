@@ -26,15 +26,29 @@ func TestNewStringFormatter(t *testing.T) {
 
 func TestStringFormatterParse(t *testing.T) {
 	sf := NewStringFormatter("%t %l %p (%c:%n): %m %%艾未未")
-	actual := sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?")
+	actual := sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", nil)
 	expected := "2014 INFO 艾未未 (acme.go:123): hello? %艾未未"
 	if expected != string(actual) {
 		t.Errorf("expected %s but got %s", expected, actual)
 	}
 
 	sf = NewStringFormatter("")
-	actual = sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?")
+	actual = sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", nil)
 	expected = ""
+	if expected != string(actual) {
+		t.Errorf("expected %s but got %s", expected, actual)
+	}
+}
+
+func TestDataAppend(t *testing.T) {
+	d := Data{
+		"foo":"bar",
+		"baz":42,
+	}
+
+	sf := NewStringFormatter("%t %l %p: %m")
+	actual := sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", d)
+	expected := "2014 INFO 艾未未: hello? foo=bar baz=42"
 	if expected != string(actual) {
 		t.Errorf("expected %s but got %s", expected, actual)
 	}

@@ -2,6 +2,7 @@ package log5go
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"unicode/utf8"
 )
@@ -64,8 +65,11 @@ func NewStringFormatter(pattern string) (sf *StringFormatter) {
 	return sf
 }
 
-func (f *StringFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string) []byte {
+func (f *StringFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data) []byte {
 	var buf bytes.Buffer
+	if data != nil {
+		msg = appendData(msg, data)
+	}
 	for _, part := range f.parts {
 		switch part {
 		case "%t":
@@ -88,4 +92,14 @@ func (f *StringFormatter) Format(timeString, levelString, prefix, caller string,
 	}
 
 	return buf.Bytes()
+}
+
+func appendData(msg string, data Data) string {
+	var buf bytes.Buffer
+	buf.WriteString(msg)
+	for key, value := range data {
+		// TODO: faster, safer way of doing this
+		buf.WriteString(fmt.Sprintf(" %s=%v", key, value))
+	}
+	return buf.String()
 }

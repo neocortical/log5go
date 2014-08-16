@@ -117,9 +117,9 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 
 	var logMessage []byte
 	if l.formatter != nil {
-		logMessage = l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg)
+		logMessage = l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
 	} else {
-		logMessage = l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg)
+		logMessage = l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
 	}
 	if len(logMessage) == 0 || logMessage[len(logMessage) - 1] != '\n' {
 		logMessage = append(logMessage, '\n')

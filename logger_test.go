@@ -55,11 +55,26 @@ func TestDefaultFormats(t *testing.T) {
 	runTest(log, &buf, RxdefaultPrefixLinesFmt, t)
 }
 
-
 func TestCustomFormat(t *testing.T) {
 	var buf bytes.Buffer
 	log := Logger(LogAll).ToWriter(&buf).WithPrefix("prefix").WithFmt("%m, %p, %l!!!")
 	runTest(log, &buf, Rxcustomformat, t)
+}
+
+func TestDataStringFormatter(t *testing.T) {
+	var buf bytes.Buffer
+	log := Logger(LogAll).ToWriter(&buf).WithFmt("%m")
+
+	// this happens to print data items in order given, but might break if Go map internals change.
+	log.WithData(Data{
+		"foo":"bar",
+		"baz":42,
+		"pi":3.14159265359,
+		}).Info("I haz a data!")
+
+	if buf.String() != "I haz a data! foo=bar baz=42 pi=3.14159265359\n" {
+		t.Errorf("expected 'I haz a data! foo=bar baz=42 pi=3.14159265359' but got %s", buf.String())
+	}
 }
 
 func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {
