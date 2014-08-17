@@ -25,6 +25,10 @@ type Log5Go interface {
 // messages with WithData(d Data). WithData() is intended to be called immediately
 // before calling a log method. Developers should not attempt to modify the
 // configuration of a logger after calling WithData().
+//
+// Data is an alias for map[string]interface{}. Callers should only insert builtin
+// types into the data map; any non-builtin types are scrubbed for compaibility with
+// different formatters.
 type Log5GoData interface {
   WithData(d Data) Log5Go
 }
@@ -44,6 +48,7 @@ type LogBuilder interface {
 	WithLn() Log5Go
 	// With a custom string format
 	WithFmt(format string) Log5Go
+	Json() Log5Go
 	Register(key string) (Log5Go, error)
 }
 

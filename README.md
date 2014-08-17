@@ -132,6 +132,8 @@ Features
 * Supports string formatting, just like fmt.Printf()
 * Standard built-in log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
 * Console or file logging
+* JSON layouts for consumption by scripts, Splunk, etc.
+* Add custom structured state data to log messages
 * Register loggers and retrieve by key (no globals, or passing logs around)
 * Interleave custom log levels with standard ones
 * Full control over date/time format (uses time.Format under the hood)
@@ -183,20 +185,25 @@ He hates these cans! Stay away from the cans!
 
 ```
 
+You can also log in JSON format by calling the .Json() method on a logger.
+
 Go's stdlib log functions print at level INFO and GoPanic() and GoFatal() print at level FATAL.
 
 
-TODO
-====
-
-* Structured layouts (JSON, HTML, etc.)
-* syslog support (better than Go's native support)
-* log chaining
-
-
-Caveats
+ROADMAP
 =======
 
-log5go is a young project and has not been deployed in production environments. Use at your own risk.
+* HTML structured layout
+* syslog support (better than Go's native support)
+* Performance benchmarking and tuning
+* log chaining?
+* 1.0 (stable API) release
+
+
+About the Developer
+===================
+
+Nathan Smith (neocortical) is a seasoned Java architect and developer and a lover of Go.
+Email him at nathan@neocortical.net
 
 Please feel free to contribute feedback, advice, feature suggestions, and pull requests!

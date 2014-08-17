@@ -1,6 +1,5 @@
 package log5go
 
-
 type Formatter interface {
 	Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data) []byte
 }

@@ -3,6 +3,7 @@ package log5go
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"regexp"
 	"testing"
 	"time"
@@ -67,6 +68,23 @@ func TestDataStringFormatter(t *testing.T) {
 	log := Logger(LogAll).ToWriter(&buf).WithFmt("%m")
 
 	runTest(log.WithData(Data{"foo":"bar", "pi":3.14159265359}), &buf, Rxmessage + " " + Rxdata, t)
+}
+
+func TestScrubData(t *testing.T) {
+	x := 1
+	var badbuf bytes.Buffer
+	badMap := map[int]string{1:"hi"}
+	var okiface interface{} = reflect.ValueOf(x).Interface()
+	var badiface interface{} = reflect.ValueOf(badbuf).Interface()
+	var slice []byte
+	var strct struct{}
+	d := Data{"badMap":badMap, "okiface":okiface, "badiface":badiface, "slice":slice, "strct":strct, "bar":"baz"}
+
+	d = scrubData(d)
+
+	if len(d) != 2 || d["bar"] != "baz" || d["okiface"] != 1 {
+		t.Errorf("expected single valid element but got: %v", d)
+	}
 }
 
 func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {

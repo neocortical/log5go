@@ -3,6 +3,7 @@ package log5go
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"runtime"
 	"sync"
 	"time"
@@ -74,6 +75,16 @@ func (l *logger) WithData(d Data) Log5Go {
 	return &boundLogger{l:l, data:d}
 }
 
+func (l *logger) Json() Log5Go {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.formatter = defaultJsonFormatter
+	return l
+}
+
+// log method is the actual logging implementation. It takes all data about a logging
+// event, prepares it, applies the appropriate formatter, and sends the data to the
+// configured log appender.
 func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, data Data) error {
 	now := time.Now() // get this early.
 	var file string
@@ -115,6 +126,8 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	}
 	levelString := GetLogLevelString(level)
 
+	data = scrubData(data)
+
 	var logMessage []byte
 	if l.formatter != nil {
 		logMessage = l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
@@ -129,6 +142,9 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	return nil // TODO: Appender should return error
 }
 
+// getDefaultFormat method inspects the logger and applies the appropriate default
+// format for the current config. logger should be locked by the caller so that
+// config remains unchained when the data is rendered for the returned format.
 func (l *logger) getDefaultFormat() Formatter {
 	if l.timeFormat == "" {
 		if l.lines != 0 {
@@ -155,4 +171,20 @@ func (l *logger) getDefaultFormat() Formatter {
 			return fmtTime
 		}
 	}
+}
+
+// scrubData scrubs map of any non-basic elements
+func scrubData(data map[string]interface{}) map[string]interface{} {
+	for key, value := range data {
+		if value == nil {
+			continue; // null values OK
+		}
+		switch reflect.TypeOf(value).Kind() {
+		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.String:
+			// let it through
+		default:
+			delete(data, key)
+		}
+	}
+	return data
 }

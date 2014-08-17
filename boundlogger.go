@@ -242,6 +242,11 @@ func (l *boundLogger) WithFmt(format string) Log5Go {
 	return l
 }
 
+func (l *boundLogger) Json() Log5Go {
+	// NOOP
+	return l
+}
+
 func (l *boundLogger) Register(key string) (_ Log5Go, _ error) {
 	// NOOP
 	return l, fmt.Errorf("can't call register after calling WithData()")
