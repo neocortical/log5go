@@ -21,6 +21,7 @@ const (
 	RxdefaultPrefixLinesFmt = Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
 	Rxmessage								= `hello, world`
 	Rxcustomformat 					= Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
+	Rxdata									= `(pi=3\.14159265359 foo=bar|foo=bar pi=3\.14159265359)`
 )
 
 func TestOutputOfMultipleLines(t *testing.T) {
@@ -65,16 +66,7 @@ func TestDataStringFormatter(t *testing.T) {
 	var buf bytes.Buffer
 	log := Logger(LogAll).ToWriter(&buf).WithFmt("%m")
 
-	// this happens to print data items in order given, but might break if Go map internals change.
-	log.WithData(Data{
-		"foo":"bar",
-		"baz":42,
-		"pi":3.14159265359,
-		}).Info("I haz a data!")
-
-	if buf.String() != "I haz a data! foo=bar baz=42 pi=3.14159265359\n" {
-		t.Errorf("expected 'I haz a data! foo=bar baz=42 pi=3.14159265359' but got %s", buf.String())
-	}
+	runTest(log.WithData(Data{"foo":"bar", "pi":3.14159265359}), &buf, Rxmessage + " " + Rxdata, t)
 }
 
 func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {
