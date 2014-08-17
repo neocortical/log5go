@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
@@ -99,12 +98,18 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 			fileAppenderMapLock.Unlock()
 			return l
 		}
-		appender = &fileAppender{sync.Mutex{}, logfile, time.Now(), RollNone, SaveAllOldLogs}
+		appender = &fileAppender{
+			f: logfile,
+			lastOpenTime: time.Now(),
+			nextRollTime: time.Now(),
+			rollFrequency: RollNone,
+			keepNLogs: SaveAllLogs,
+		}
 		fileAppenderMap[fullFilename] = appender
 	}
 
 	if !fileRollerRunning {
-		go periodicFileRoller()
+		go periodicFileWatcher()
 		fileRollerRunning = true
 	}
 	fileAppenderMapLock.Unlock()

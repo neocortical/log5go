@@ -1,6 +1,7 @@
 package log5go
 
 import (
+	"os"
 	"testing"
 	"time"
 )
@@ -34,5 +35,76 @@ func TestArchiveFilenamesDifferAcrossDST(t *testing.T) {
 	}
 	if f2 != "foo.log.2014-11-02-01-00-PST" {
 		t.Errorf("expected filename 'foo.log.2014-03-09-03-00-PDT' but got %s", f2)
+	}
+}
+
+func TestWatchFiles(t *testing.T) {
+	fname := "/tmp/reopentest.log"
+	logfile, err := os.Create(fname)
+	if err != nil {
+		t.Errorf("error opening test file: %v", err)
+	}
+	a := &fileAppender{
+		f: logfile,
+		lastOpenTime: time.Now(),
+		nextRollTime: time.Now(),
+		rollFrequency: RollNone,
+		keepNLogs: SaveAllLogs,
+	}
+	fileAppenderMap[fname] = a
+
+	if !a.validFile() {
+		t.Error("expected validFile() to return true but got false")
+	}
+
+	// remove the file out from under the appender
+	err = os.Remove(fname)
+	if err != nil {
+		t.Errorf("error deleting test file: %v", err)
+	}
+
+	if a.validFile() {
+		t.Error("expected validFile() to return false but got true")
+	}
+}
+
+func TestAutoReopen(t *testing.T) {
+	fname := "/tmp/reopentest.log"
+	logfile, err := os.Create(fname)
+	if err != nil {
+		t.Errorf("error opening test file: %v", err)
+	}
+	a := &fileAppender{
+		f: logfile,
+		lastOpenTime: time.Now(),
+		nextRollTime: time.Now(),
+		rollFrequency: RollNone,
+		keepNLogs: SaveAllLogs,
+	}
+	fileAppenderMap[fname] = a
+
+	// remove the file out from under the appender
+	err = os.Remove(fname)
+	if err != nil {
+		t.Errorf("error deleting test file: %v", err)
+	}
+
+	// detect failure
+	watchFiles(time.Now())
+
+	// should error: reopen refractory period not reached
+	err = a.Append([]byte("hello"), LogInfo, time.Now())
+	if err == nil {
+		t.Error("should have errored writing to deleted file")
+	}
+
+	a.lastOpenTime = time.Now().Add(-time.Hour)
+
+	watchFiles(time.Now())
+
+	// should not error: file should be automatically reopened
+	err = a.Append([]byte("hello"), LogInfo, time.Now())
+	if err != nil {
+		t.Errorf("failed to reopen test file: %v", err)
 	}
 }

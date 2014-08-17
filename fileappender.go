@@ -11,6 +11,7 @@ import (
 type fileAppender struct {
 	lock          sync.Mutex
 	f             *os.File
+	lastOpenTime  time.Time
 	nextRollTime  time.Time
 	rollFrequency rollFrequency
 	keepNLogs     int
@@ -19,6 +20,9 @@ type fileAppender struct {
 var fileAppenderMap = make(map[string]*fileAppender)
 var fileAppenderMapLock = sync.Mutex{}
 var fileRollerRunning = false
+
+var fileWatcherPeriod time.Duration = time.Second * 10
+var fileReopenRefractoryPeriod time.Duration = time.Minute
 
 func (a *fileAppender) Append(msg []byte, level LogLevel, tstamp time.Time) error {
 	a.lock.Lock()
@@ -82,20 +86,53 @@ func generateArchiveFilename(fname string, rollTime time.Time, freq rollFrequenc
 	return fmt.Sprintf("%s.%s", fname, rollTime.Format(timeFormat))
 }
 
+// validFile method returns true iff file is open and valid. Caller should protect with lock.
+func (a *fileAppender) validFile() bool {
+	_, err := a.f.Stat()
+	return err == nil
+}
+
+// shouldAttemptFileReopen method returns true iff the appender should attempt to reopen file
+// Caller should protect by locking appender.
+func (a *fileAppender) shouldAttemptFileReopen() bool {
+	return time.Now().Sub(a.lastOpenTime) > fileReopenRefractoryPeriod
+}
+
+func (a *fileAppender) reopenFile() {
+	a.lastOpenTime = time.Now()
+	newFile, err := os.OpenFile(a.f.Name(), os.O_APPEND | os.O_CREATE, 0666)
+	if err != nil {
+		a.f = newFile
+	} else {
+		a.f.Close() // ignore errors
+	}
+}
+
 // run in goroutine to periodically check logs for rollability
-func periodicFileRoller() {
-	ticker := time.NewTicker(time.Second * 15)
+func periodicFileWatcher() {
+	ticker := time.NewTicker(fileWatcherPeriod)
 	for {
 		tick := <-ticker.C
 
-		fileAppenderMapLock.Lock()
-		for _, a := range fileAppenderMap {
-			a.lock.Lock()
-			if a.shouldRoll(tick) {
-				a.doRoll()
-			}
-			a.lock.Unlock()
-		}
-		fileAppenderMapLock.Unlock()
+		watchFiles(tick)
 	}
+}
+
+func watchFiles(tick time.Time) {
+	fileAppenderMapLock.Lock()
+	for _, a := range fileAppenderMap {
+		a.lock.Lock()
+		if !a.validFile() {
+			if a.shouldAttemptFileReopen() {
+				a.reopenFile()
+			} else {
+				a.f.Close() // ignore errors
+			}
+		}
+		if a.shouldRoll(tick) {
+			a.doRoll()
+		}
+		a.lock.Unlock()
+	}
+	fileAppenderMapLock.Unlock()
 }

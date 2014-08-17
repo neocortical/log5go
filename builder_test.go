@@ -131,8 +131,8 @@ func TestToFile(t *testing.T) {
 	if a.rollFrequency != RollNone {
 		t.Errorf("expected rollFrequency init'd to none but was %d", a.rollFrequency)
 	}
-	if a.keepNLogs != SaveAllOldLogs {
-		t.Errorf("expected keepNLogs to be SaveAllOldLogs but was %d", a.keepNLogs)
+	if a.keepNLogs != SaveAllLogs {
+		t.Errorf("expected keepNLogs to be SaveAllLogs but was %d", a.keepNLogs)
 	}
 }
 
