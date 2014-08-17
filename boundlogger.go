@@ -81,8 +81,8 @@ func (l *boundLogger) Fatal(format string, a ...interface{}) {
 	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, a...), l.data)
 }
 
-func (l *boundLogger) GetLogLevel() LogLevel {
-	return l.l.GetLogLevel()
+func (l *boundLogger) LogLevel() LogLevel {
+	return l.l.LogLevel()
 }
 
 func (l *boundLogger) SetLogLevel(level LogLevel) {

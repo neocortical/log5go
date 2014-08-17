@@ -4,15 +4,16 @@ import "sync"
 
 type LogLevel uint16
 
-// Standard log levels (lifted directly from log4j)
+// Standard log levels. Map to intergers separated by 100 to allow for custom
+// log levels to be intermingled with standard ones.
 const (
-	LogAll   LogLevel = 0
-	LogTrace LogLevel = 100
-	LogDebug LogLevel = 200
-	LogInfo  LogLevel = 300
-	LogWarn  LogLevel = 400
-	LogError LogLevel = 500
-	LogFatal LogLevel = 600
+	LogAll   LogLevel = iota * 100
+	LogTrace
+	LogDebug
+	LogInfo
+	LogWarn
+	LogError
+	LogFatal
 )
 
 // maps log levels to prefix strings describing each. extensible
@@ -33,6 +34,12 @@ var levelMapLock = new(sync.RWMutex)
 func RegisterLogLevel(level LogLevel, prefix string) {
 	levelMapLock.Lock()
 	levelMap[level] = prefix
+	levelMapLock.Unlock()
+}
+
+func DeregisterLogLevel(level LogLevel) {
+	levelMapLock.Lock()
+	delete(levelMap, level)
 	levelMapLock.Unlock()
 }
 

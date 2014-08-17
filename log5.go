@@ -14,7 +14,7 @@ type Log5Go interface {
 	Warn(format string, a ...interface{})
 	Error(format string, a ...interface{})
 	Fatal(format string, a ...interface{})
-	GetLogLevel() LogLevel
+	LogLevel() LogLevel
 	SetLogLevel(level LogLevel)
 	GoLogger
 	LogBuilder

@@ -5,13 +5,25 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
 
+type loggerTest struct {
+	testname string
+	msg string
+	args []interface{}
+	data Data
+	timeFormat string
+	prefix string
+	formatter Formatter
+	expected string
+}
+
 const (
-	Rxdate         					= `[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]`
-	Rxtime         					= `[0-9][0-9]:[0-9][0-9]:[0-9][0-9]`
+	Rxdate         					= `[0-9]{4}/[0-9]{2}/[0-9]{2}`
+	Rxtime         					= `[0-9]{2}:[0-9]{2}:[0-9]{2}`
 	Rxlevel									= `(TRACE|DEBUG|INFO|WARN|ERROR|FATAL|CUSTOM)`
 	Rxprefix								= `prefix`
 	Rxcaller								= `[a-zA-Z0-9_\-\/\.]+\.go`
@@ -24,6 +36,101 @@ const (
 	Rxcustomformat 					= Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
 	Rxdata									= `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
 )
+
+var loggerTests = []loggerTest {
+	{"basic", "hello", []interface{}{}, Data{}, "2006", "noshow", NewStringFormatter("%t %l %m"), "^[0-9]{4} {{level}} hello\n$"},
+	{"stdwithutf8", "侍 (%s)", []interface{}{"samurai"}, Data{}, TF_GoStd, "prefix", nil, "^" + Rxdate + " " + Rxtime + " {{level}} prefix: 侍 \\(samurai\\)\n$"},
+}
+
+func TestAllLoggerLevels(t *testing.T) {
+	var buf bytes.Buffer
+	appender := &writerAppender{dest:&buf}
+
+	for _, test := range loggerTests {
+		l := &logger{
+			level: LogAll,
+			formatter: test.formatter,
+			appender: appender,
+			timeFormat: test.timeFormat,
+			prefix: test.prefix,
+		}
+		runLoggerLevelTest(l, &buf, &test, t)
+	}
+}
+
+func runLoggerLevelTest(l Log5Go, buf *bytes.Buffer, test *loggerTest, t *testing.T) {
+
+	var LLCustom LogLevel = LogInfo + 1
+	RegisterLogLevel(LLCustom, "CUSTOM")
+
+	l.SetLogLevel(LogTrace)
+	l.Trace(test.msg, test.args...)
+	expected := subLevel(test.expected, "TRACE")
+	assertMatch(test.testname, "trace", expected, buf, t)
+	l.SetLogLevel(LogTrace + 1)
+	l.Trace(test.msg, test.args...)
+	assertMatch(test.testname, "tracethresh", "", buf, t)
+
+	l.SetLogLevel(LogDebug)
+	l.Debug(test.msg, test.args...)
+	expected = subLevel(test.expected, "DEBUG")
+	assertMatch(test.testname, "debug", expected, buf, t)
+	l.SetLogLevel(LogDebug + 1)
+	l.Debug(test.msg, test.args...)
+	assertMatch(test.testname, "debugthresh", "", buf, t)
+
+	l.SetLogLevel(LogAll)
+	l.Info(test.msg, test.args...)
+	expected = subLevel(test.expected, "INFO")
+	assertMatch(test.testname, "info", expected, buf, t)
+	l.SetLogLevel(LogInfo + 1)
+	l.Info(test.msg, test.args...)
+	assertMatch(test.testname, "infothresh", "", buf, t)
+
+	l.Warn(test.msg, test.args...)
+	expected = subLevel(test.expected, "WARN")
+	assertMatch(test.testname, "warn", expected, buf, t)
+	l.SetLogLevel(LogWarn + 1)
+	l.Warn(test.msg, test.args...)
+	assertMatch(test.testname, "warnthresh", "", buf, t)
+
+	l.Error(test.msg, test.args...)
+	expected = subLevel(test.expected, "ERROR")
+	assertMatch(test.testname, "error", expected, buf, t)
+	l.SetLogLevel(LogError + 1)
+	l.Error(test.msg, test.args...)
+	assertMatch(test.testname, "errorthresh", "", buf, t)
+
+	l.Fatal(test.msg, test.args...)
+	expected = subLevel(test.expected, "FATAL")
+	assertMatch(test.testname, "fatal", expected, buf, t)
+	l.SetLogLevel(LogFatal + 1)
+	l.Fatal(test.msg, test.args...)
+	assertMatch(test.testname, "fatalthresh", "", buf, t)
+
+	l.SetLogLevel(LLCustom)
+	l.Log(LLCustom, test.msg, test.args...)
+	expected = subLevel(test.expected, "CUSTOM")
+	assertMatch(test.testname, "custom", expected, buf, t)
+	l.SetLogLevel(LogWarn)
+	l.Log(LLCustom, test.msg, test.args...)
+	assertMatch(test.testname, "customthresh", "", buf, t)
+
+	// cleanup
+	DeregisterLogLevel(LLCustom)
+}
+
+func assertMatch(testname string, testpart, expected string, buf *bytes.Buffer, t *testing.T) {
+	matched, err := regexp.MatchString(expected, buf.String())
+	if err != nil || !matched {
+		t.Errorf("test %s/%s expected \n%s but got \n%s", testname, testpart, expected, buf.String())
+	}
+	buf.Reset()
+}
+
+func subLevel(expected, level string) string {
+	return strings.Replace(expected, "{{level}}", level, -1)
+}
 
 func TestOutputOfMultipleLines(t *testing.T) {
 	year := time.Now().Year()
@@ -113,4 +220,24 @@ func (a *bufferAppender) Append(msg []byte, level LogLevel, tstamp time.Time) (e
 	msg = TerminateMessageWithNewline(msg)
 	_, err = a.buf.Write([]byte(msg))
 	return err
+}
+
+func TestGetSetLevel(t *testing.T) {
+	var buf bytes.Buffer
+	appender := &writerAppender{dest:&buf}
+	l := &logger{
+		level: LogAll,
+		formatter: nil,
+		appender: appender,
+		timeFormat: TF_GoStd,
+		prefix: "foo",
+	}
+
+	l.SetLogLevel(LogWarn)
+	if l.LogLevel() != LogWarn {
+		t.Errorf("expected %d but got %d", LogWarn, l.LogLevel())
+	}
+	if l.level != LogWarn {
+		t.Errorf("expected %d but got %d", LogWarn, l.level)
+	}
 }

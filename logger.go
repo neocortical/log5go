@@ -61,7 +61,7 @@ func (l *logger) Fatal(format string, a ...interface{}) {
 	l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, a...), nil)
 }
 
-func (l *logger) GetLogLevel() LogLevel {
+func (l *logger) LogLevel() LogLevel {
 	return l.level
 }
 
