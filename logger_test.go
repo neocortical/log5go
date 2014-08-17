@@ -109,6 +109,8 @@ type bufferAppender struct {
 	buf bytes.Buffer
 }
 
-func (a *bufferAppender) Append(msg string, level LogLevel, tstamp time.Time) {
-	a.buf.Write([]byte(msg))
+func (a *bufferAppender) Append(msg []byte, level LogLevel, tstamp time.Time) (err error) {
+	msg = TerminateMessageWithNewline(msg)
+	_, err = a.buf.Write([]byte(msg))
+	return err
 }

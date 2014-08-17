@@ -20,18 +20,22 @@ var fileAppenderMap = make(map[string]*fileAppender)
 var fileAppenderMapLock = sync.Mutex{}
 var fileRollerRunning = false
 
-func (a *fileAppender) Append(msg string, level LogLevel, tstamp time.Time) {
+func (a *fileAppender) Append(msg []byte, level LogLevel, tstamp time.Time) error {
 	a.lock.Lock()
 	defer a.lock.Unlock()
+
+	msg = TerminateMessageWithNewline(msg)
 
 	if a.shouldRoll(tstamp) {
 		a.doRoll()
 	}
 
 	// sanity check here, in case file couldn't be reopened after rolling
-	if a.f != nil {
-		a.f.Write([]byte(msg))
+	if a.f == nil {
+		return fmt.Errorf("file couldn't be opened")
 	}
+	_, err := a.f.Write(msg)
+	return err
 }
 
 // Determine whether we should roll the log file. Must be in lock already.
@@ -80,7 +84,6 @@ func generateArchiveFilename(fname string, rollTime time.Time, freq rollFrequenc
 
 // run in goroutine to periodically check logs for rollability
 func periodicFileRoller() {
-
 	ticker := time.NewTicker(time.Second * 15)
 	for {
 		tick := <-ticker.C
@@ -95,5 +98,4 @@ func periodicFileRoller() {
 		}
 		fileAppenderMapLock.Unlock()
 	}
-
 }

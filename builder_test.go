@@ -237,8 +237,9 @@ func TestRegister(t *testing.T) {
 
 type nilAppender struct{}
 
-func (a *nilAppender) Append(msg string, level LogLevel, tstamp time.Time) {
+func (a *nilAppender) Append(msg []byte, level LogLevel, tstamp time.Time) error {
 	// NOOP
+	return nil
 }
 
 func TestToAppender(t *testing.T) {

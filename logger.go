@@ -134,12 +134,8 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	} else {
 		logMessage = l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
 	}
-	if len(logMessage) == 0 || logMessage[len(logMessage) - 1] != '\n' {
-		logMessage = append(logMessage, '\n')
-	}
 
-	l.appender.Append(string(logMessage), level, now)
-	return nil // TODO: Appender should return error
+	return l.appender.Append(logMessage, level, now)
 }
 
 // getDefaultFormat method inspects the logger and applies the appropriate default
