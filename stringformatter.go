@@ -98,8 +98,18 @@ func appendData(msg string, data Data) string {
 	var buf bytes.Buffer
 	buf.WriteString(msg)
 	for key, value := range data {
-		// TODO: faster, safer way of doing this
-		buf.WriteString(fmt.Sprintf(" %s=%v", key, value))
+		buf.WriteRune(' ')
+		buf.WriteString(key)
+		buf.WriteRune('=')
+		stringData, isString := value.(string)
+		if isString {
+			buf.WriteRune('"')
+			buf.WriteString(stringData)
+			buf.WriteRune('"')
+		} else {
+			// TODO: faster way of doing this
+			buf.WriteString(fmt.Sprintf("%v", value))
+		}
 	}
 	return buf.String()
 }

@@ -22,7 +22,7 @@ const (
 	RxdefaultPrefixLinesFmt = Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
 	Rxmessage								= `hello, world`
 	Rxcustomformat 					= Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
-	Rxdata									= `(pi=3\.14159265359 foo=bar|foo=bar pi=3\.14159265359)`
+	Rxdata									= `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
 )
 
 func TestOutputOfMultipleLines(t *testing.T) {

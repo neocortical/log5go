@@ -48,8 +48,8 @@ func TestDataAppend(t *testing.T) {
 
 	sf := NewStringFormatter("%t %l %p: %m")
 	actual := sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", d)
-	expected := "2014 INFO 艾未未: hello? foo=bar baz=42"
-	expected2 := "2014 INFO 艾未未: hello? baz=42 foo=bar"
+	expected := "2014 INFO 艾未未: hello? foo=\"bar\" baz=42"
+	expected2 := "2014 INFO 艾未未: hello? baz=42 foo=\"bar\""
 	if expected != string(actual) && expected2 != string(actual) {
 		t.Errorf("expected %s but got %s", expected, actual)
 	}
