@@ -3,7 +3,6 @@ package log5go
 import (
 	"fmt"
 	"io"
-	"os"
 	"sync"
 	"time"
 )
@@ -139,21 +138,21 @@ func (l *boundLogger) GoFatal(v ...interface{}) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogFatal, 2, fmt.Sprint(v...), l.data)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *boundLogger) GoFatalf(format string, v ...interface{}) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...), l.data)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *boundLogger) GoFatalln(v ...interface{}) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...), l.data)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *boundLogger) GoPanic(v ...interface{}) {

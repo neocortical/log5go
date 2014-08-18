@@ -3,6 +3,7 @@ package log5go
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
@@ -83,6 +84,8 @@ func runLoggerLevelTest(l Log5Go, buf *bytes.Buffer, test *loggerTest, t *testin
 	l.Info(test.msg, test.args...)
 	expected = subLevel(test.expected, "INFO")
 	assertMatch(test.testname, "info", expected, buf, t)
+	l.Printf(test.msg, test.args...)
+	assertMatch(test.testname, "printf", expected, buf, t)
 	l.SetLogLevel(LogInfo + 1)
 	l.Info(test.msg, test.args...)
 	assertMatch(test.testname, "infothresh", "", buf, t)
@@ -101,12 +104,31 @@ func runLoggerLevelTest(l Log5Go, buf *bytes.Buffer, test *loggerTest, t *testin
 	l.Error(test.msg, test.args...)
 	assertMatch(test.testname, "errorthresh", "", buf, t)
 
+	exitCalled := ""
+	exitFunc = func(i int) {
+		exitCalled = fmt.Sprintf("%d", i)
+	}
+
 	l.Fatal(test.msg, test.args...)
+	if exitCalled != "" {
+		t.Errorf("exit shouldn't have been called but was with %s", exitCalled)
+	}
 	expected = subLevel(test.expected, "FATAL")
 	assertMatch(test.testname, "fatal", expected, buf, t)
 	l.SetLogLevel(LogFatal + 1)
 	l.Fatal(test.msg, test.args...)
 	assertMatch(test.testname, "fatalthresh", "", buf, t)
+
+	// test gofatalf
+	l.SetLogLevel(LogAll)
+	l.GoFatalf(test.msg, test.args...)
+	if exitCalled != "1" {
+		t.Errorf("exit not called or wrong output code given: %s", exitCalled)
+	}
+	assertMatch(test.testname, "gofatalf", "", buf, t)
+
+	// cleanup
+	exitFunc = os.Exit
 
 	l.SetLogLevel(LLCustom)
 	l.Log(LLCustom, test.msg, test.args...)
@@ -240,4 +262,73 @@ func TestGetSetLevel(t *testing.T) {
 	if l.level != LogWarn {
 		t.Errorf("expected %d but got %d", LogWarn, l.level)
 	}
+}
+
+func TestLoggerFatals(t *testing.T) {
+	exitCalled := 0
+	exitFunc = func(i int) {
+		exitCalled = i
+	}
+
+	l := &logger{
+		level: LogAll,
+		formatter: nil,
+		appender: &writerAppender{dest:os.Stdout},
+		timeFormat: TF_GoStd,
+		prefix: "",
+	}
+
+	l.GoFatal("jeepers!")
+	if exitCalled != 1 {
+		t.Error("expected exit called, but wasn't")
+	}
+
+	exitCalled = 0
+	l.GoFatalf("yoinks!")
+	if exitCalled != 1 {
+		t.Error("expected exit called, but wasn't")
+	}
+
+	exitCalled = 0
+	l.GoFatalln("aye carumba!")
+	if exitCalled != 1 {
+		t.Error("expected exit called, but wasn't")
+	}
+
+	// cleanup
+	exitFunc = os.Exit
+}
+
+func TestLoggerPanics(t *testing.T) {
+	l := &logger{
+		level: LogAll,
+		formatter: nil,
+		appender: &writerAppender{dest:os.Stdout},
+		timeFormat: TF_GoStd,
+		prefix: "",
+	}
+
+	f := func(l *logger, t *testing.T) {
+		defer assertRecoverPanic(t)
+		l.GoPanic("aiyeee!")
+	}
+	f(l, t)
+
+	f = func(l *logger, t *testing.T) {
+		defer assertRecoverPanic(t)
+		l.GoPanicf("[wilhelm scream]!")
+	}
+	f(l, t)
+
+	f = func(l *logger, t *testing.T) {
+		defer assertRecoverPanic(t)
+		l.GoPanicln("where am i?!")
+	}
+	f(l, t)
+}
+
+func assertRecoverPanic(t *testing.T) {
+	if r := recover(); r == nil {
+    t.Error("expected panic. got nothing.")
+  }
 }

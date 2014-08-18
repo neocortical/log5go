@@ -24,6 +24,9 @@ const (
 	LstdFlags     = Ldate | Ltime // initial values for the standard logger
 )
 
+// Holds the function that Fatal(), etc. will use to exit the program
+var exitFunc = os.Exit
+
 // GoLogger interface implements the Go stdlib log package. Log5Go is almost
 // backward-compatible with stdlib. The only differences are A) we implement
 // logging ops as an interface instead of a struct so passing around *Logger
@@ -166,17 +169,17 @@ func (l *logger) Println(v ...interface{}) {
 
 func (l *logger) GoFatal(v ...interface{}) {
 	l.log(time.Now(), LogFatal, 2, fmt.Sprint(v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *logger) GoFatalf(format string, v ...interface{}) {
 	l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *logger) GoFatalln(v ...interface{}) {
 	l.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 func (l *logger) GoPanic(v ...interface{}) {
@@ -215,19 +218,19 @@ func Println(v ...interface{}) {
 // GoFatal calls GoFatal on the default logger
 func GoFatal(v ...interface{}) {
 	std.log(time.Now(), LogFatal, 2, fmt.Sprint(v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 // GoFatalf calls GoFatalf on the default logger
 func GoFatalf(format string, v ...interface{}) {
 	std.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 // GoFatalln calls GoFatalln on the default logger
 func GoFatalln(v ...interface{}) {
 	std.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...), nil)
-	os.Exit(1)
+	exitFunc(1)
 }
 
 // GoPanic calls GoPanic on the default logger
