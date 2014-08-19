@@ -1,5 +1,6 @@
 package log5go
 
+// interface Formatter formats a log message into *out for passing to an Appender
 type Formatter interface {
 	Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, out *[]byte)
 }

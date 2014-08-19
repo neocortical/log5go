@@ -7,13 +7,13 @@ type LogLevel uint16
 // Standard log levels. Map to intergers separated by 100 to allow for custom
 // log levels to be intermingled with standard ones.
 const (
-	LogAll LogLevel = iota * 100
-	LogTrace
-	LogDebug
-	LogInfo
-	LogWarn
-	LogError
-	LogFatal
+	LogAll LogLevel = iota * 100	// Log all messages, regardless of level
+	LogTrace											// TRACE log leve/threshold
+	LogDebug											// DEBUG log leve/threshold
+	LogInfo												// INFO log leve/threshold
+	LogWarn												// WARN log leve/threshold
+	LogError											// ERROR log leve/threshold
+	LogFatal											// FATAL log leve/threshold
 )
 
 // maps log levels to prefix strings describing each. extensible
@@ -30,13 +30,14 @@ var levelMap = map[LogLevel]string{
 // Protects levelMap
 var levelMapLock = new(sync.RWMutex)
 
-// Replace a log level prefix string, or add one for a custom log level
+// RegisterLogLevel replaces a log level prefix string, or adds one for a custom log level
 func RegisterLogLevel(level LogLevel, prefix string) {
 	levelMapLock.Lock()
 	levelMap[level] = prefix
 	levelMapLock.Unlock()
 }
 
+// DeregisterLogLevel deletes a log level string, so it will not be used in log messages at that level
 func DeregisterLogLevel(level LogLevel) {
 	levelMapLock.Lock()
 	delete(levelMap, level)

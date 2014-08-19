@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Entry point for building a new logger. Start here. Takes the desired log level.
+// Logger is the entry point for building a new logger. Takes the desired log level threshold and returns a stderr logger.
 func Logger(level LogLevel) Log5Go {
 	logger := logger{
 		level:      level,

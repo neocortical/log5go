@@ -59,6 +59,26 @@ log.Error("Warn, error, and fatal go to stderr")
 
 ```
 
+A JSON logger
+-------------
+
+```go
+
+log = l5g.Logger(l5g.LogAll).ToStdout().Json()
+log.Info("I'm inside a JSON string!")
+
+```
+
+A logger with structured data
+-----------------------------
+
+```go
+
+log = l5g.Logger(l5g.LogAll).ToStdout()
+log.WithData(l5g.Data{"foo":"bar", "baz":1}).Info("Hey look, some data: ")
+
+```
+
 A simple file logger
 --------------------
 
