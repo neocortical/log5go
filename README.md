@@ -7,7 +7,7 @@ Very loosely based on the (in)famous log4j Java logging library, but uncluttered
 
 Log5Go is *mostly* compatible with Go's log package, and is almost a drop-in replacement. See section on replacing the Go logger for details.
 
-[![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go) [![Coverage](http://gocover.io/_badge/github.com/neocortical/log5go)](http://gocover.io/github.com/neocortical/log5go) [![GoDoc](https://godoc.org/github.com/neocortical/log5go?status.svg)](https://godoc.org/github.com/neocortical/log5go)
+[![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go) [![Coverage](http://gocover.io/_badge/github.com/neocortical/log5go?v=1)](http://gocover.io/github.com/neocortical/log5go?v=1) [![GoDoc](https://godoc.org/github.com/neocortical/log5go?status.svg)](https://godoc.org/github.com/neocortical/log5go)
 
 Install
 =======
