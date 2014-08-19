@@ -6,7 +6,7 @@ import (
 
 func TestDefaultJsonFormatter(t *testing.T) {
 	d := Data{
-		"bar":"baz",
+		"bar": "baz",
 	}
 	var buf []byte
 

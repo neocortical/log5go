@@ -117,7 +117,7 @@ func TestWeeklyOperations(t *testing.T) {
 
 func TestHourlyHandlesDSTStart(t *testing.T) {
 
-  // err is ok here. times will be UTC and code/test will behave correctly
+	// err is ok here. times will be UTC and code/test will behave correctly
 	loc, _ := time.LoadLocation("America/Los_Angeles")
 
 	t0, _ := time.ParseInLocation(time.RFC822, "09 Mar 14 00:15 PST", loc)

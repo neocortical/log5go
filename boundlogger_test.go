@@ -6,19 +6,19 @@ import (
 	"testing"
 )
 
-var boundLoggerTests = []loggerTest {
-	{"withdata", "hello, %s", []interface{}{"world"}, Data{"foo":"bar"}, TF_GoStd, "prefix", nil, "^" + Rxdate + " " + Rxtime + " {{level}} prefix: hello, world foo=\"bar\"\n$"},
+var boundLoggerTests = []loggerTest{
+	{"withdata", "hello, %s", []interface{}{"world"}, Data{"foo": "bar"}, TF_GoStd, "prefix", nil, "^" + Rxdate + " " + Rxtime + " {{level}} prefix: hello, world foo=\"bar\"\n$"},
 }
 
 func TestWithData(t *testing.T) {
 	inner, _ := Logger(LogAll).(*logger)
-	bl := &boundLogger{l: inner, data:make(Data)}
+	bl := &boundLogger{l: inner, data: make(Data)}
 
 	if len(bl.data) != 0 {
 		t.Errorf("expected empty data but got %v", bl.data)
 	}
 
-	bl, ok := bl.WithData(Data{"foo":"bar", "baz":1}).(*boundLogger)
+	bl, ok := bl.WithData(Data{"foo": "bar", "baz": 1}).(*boundLogger)
 	if !ok {
 		t.Error("expected *boundLogger back from WithData")
 	}
@@ -27,7 +27,7 @@ func TestWithData(t *testing.T) {
 	}
 
 	// piling on
-	bl, ok = bl.WithData(Data{"baz":2, "qux":3.14}).(*boundLogger)
+	bl, ok = bl.WithData(Data{"baz": 2, "qux": 3.14}).(*boundLogger)
 	if !ok {
 		t.Error("expected *boundLogger back from WithData")
 	}
@@ -38,18 +38,18 @@ func TestWithData(t *testing.T) {
 
 func TestAllBoundLoggerLevels(t *testing.T) {
 	var buf bytes.Buffer
-	appender := &writerAppender{dest:&buf}
+	appender := &writerAppender{dest: &buf}
 
 	for _, test := range loggerTests {
 		l := &logger{
-			level: LogAll,
-			formatter: test.formatter,
-			appender: appender,
+			level:      LogAll,
+			formatter:  test.formatter,
+			appender:   appender,
 			timeFormat: test.timeFormat,
-			prefix: test.prefix,
+			prefix:     test.prefix,
 		}
 		bl := &boundLogger{
-			l: l,
+			l:    l,
 			data: test.data,
 		}
 		runLoggerLevelTest(bl, &buf, &test, t)
@@ -57,14 +57,14 @@ func TestAllBoundLoggerLevels(t *testing.T) {
 
 	for _, test := range boundLoggerTests {
 		l := &logger{
-			level: LogAll,
-			formatter: test.formatter,
-			appender: appender,
+			level:      LogAll,
+			formatter:  test.formatter,
+			appender:   appender,
 			timeFormat: test.timeFormat,
-			prefix: test.prefix,
+			prefix:     test.prefix,
 		}
 		bl := &boundLogger{
-			l: l,
+			l:    l,
 			data: test.data,
 		}
 		runLoggerLevelTest(bl, &buf, &test, t)
@@ -73,17 +73,17 @@ func TestAllBoundLoggerLevels(t *testing.T) {
 
 func TestBoundLoggerBuilderNoops(t *testing.T) {
 	var buf bytes.Buffer
-	appender := &writerAppender{dest:&buf}
+	appender := &writerAppender{dest: &buf}
 	formatter := NewStringFormatter("%m")
 	l := &logger{
-		level: LogAll,
-		formatter: formatter,
-		appender: appender,
+		level:      LogAll,
+		formatter:  formatter,
+		appender:   appender,
 		timeFormat: TF_GoStd,
-		prefix: "foo",
+		prefix:     "foo",
 	}
 	bl := &boundLogger{
-		l: l,
+		l:    l,
 		data: Data{},
 	}
 
@@ -142,7 +142,7 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 		t.Error("appender changed")
 	}
 
-	bl2 = bl.ToAppender(&writerAppender{dest:os.Stdout})
+	bl2 = bl.ToAppender(&writerAppender{dest: os.Stdout})
 	if bl2 != bl || l.appender != appender {
 		t.Error("appender changed")
 	}
@@ -186,14 +186,14 @@ func TestBoundLoggerFatals(t *testing.T) {
 	}
 
 	inner := &logger{
-		level: LogAll,
-		formatter: nil,
-		appender: &writerAppender{dest:os.Stdout},
+		level:      LogAll,
+		formatter:  nil,
+		appender:   &writerAppender{dest: os.Stdout},
 		timeFormat: TF_GoStd,
-		prefix: "",
+		prefix:     "",
 	}
 	l := &boundLogger{
-		l: inner,
+		l:    inner,
 		data: Data{},
 	}
 
@@ -220,14 +220,14 @@ func TestBoundLoggerFatals(t *testing.T) {
 
 func TestBoundLoggerPanics(t *testing.T) {
 	inner := &logger{
-		level: LogAll,
-		formatter: nil,
-		appender: &writerAppender{dest:os.Stdout},
+		level:      LogAll,
+		formatter:  nil,
+		appender:   &writerAppender{dest: os.Stdout},
 		timeFormat: TF_GoStd,
-		prefix: "",
+		prefix:     "",
 	}
 	l := &boundLogger{
-		l: inner,
+		l:    inner,
 		data: Data{},
 	}
 

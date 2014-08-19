@@ -7,8 +7,8 @@ import (
 )
 
 type writerAppender struct {
-	lock sync.Mutex
-	dest io.Writer
+	lock    sync.Mutex
+	dest    io.Writer
 	errDest io.Writer
 }
 

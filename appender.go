@@ -16,7 +16,7 @@ type Appender interface {
 // newline if not there already. If you write a custom appender and want line
 // termination, you should call this function on the msg before writing it.
 func TerminateMessageWithNewline(msg *[]byte) {
-	if len(*msg) == 0 || (*msg)[len(*msg) - 1] != '\n' {
+	if len(*msg) == 0 || (*msg)[len(*msg)-1] != '\n' {
 		*msg = append(*msg, '\n')
 	}
 }

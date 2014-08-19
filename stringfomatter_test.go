@@ -44,8 +44,8 @@ func TestStringFormatterParse(t *testing.T) {
 
 func TestDataAppend(t *testing.T) {
 	d := Data{
-		"foo":"bar",
-		"baz":42,
+		"foo": "bar",
+		"baz": 42,
 	}
 
 	var buf []byte
@@ -60,15 +60,15 @@ func TestDataAppend(t *testing.T) {
 }
 
 func testEq(a, b []string) bool {
-    if len(a) != len(b) {
-        return false
-    }
+	if len(a) != len(b) {
+		return false
+	}
 
-    for i := range a {
-        if a[i] != b[i] {
-            return false
-        }
-    }
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
 
-    return true
+	return true
 }

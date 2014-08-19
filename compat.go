@@ -88,7 +88,7 @@ func New(out io.Writer, prefix string, flag int) Log5Go {
 }
 
 func (l *logger) Output(calldepth int, s string) error {
-	return l.log(time.Now(), LogInfo, calldepth + 1, s, nil)
+	return l.log(time.Now(), LogInfo, calldepth+1, s, nil)
 }
 
 func (l *logger) SetOutput(out io.Writer) {
@@ -256,22 +256,22 @@ func GoPanicln(v ...interface{}) {
 
 // parseTimeFmt extracts a time format string from Go log flags
 func parseTimeFmt(flag int) string {
-	if flag & (Ldate | Ltime | Lmicroseconds) == 0 {
+	if flag&(Ldate|Ltime|Lmicroseconds) == 0 {
 		return ""
 	}
 
 	buf := new(bytes.Buffer)
-	if flag & Ldate > 0 {
+	if flag&Ldate > 0 {
 		buf.Write([]byte("2006/01/02"))
 	}
-	if flag & (Ltime | Lmicroseconds) > 0 {
+	if flag&(Ltime|Lmicroseconds) > 0 {
 		if buf.Len() > 0 {
 			buf.Write([]byte(" 15:04:05"))
 		} else {
 			buf.Write([]byte("15:04:05"))
 		}
 
-		if flag & Lmicroseconds > 0 {
+		if flag&Lmicroseconds > 0 {
 			buf.Write([]byte(".000000"))
 		}
 	}
@@ -281,8 +281,8 @@ func parseTimeFmt(flag int) string {
 
 // parseLines extracts an isolated Go std log flag (can be 0, Lshortfile, or Llongfile)
 func parseLines(flag int) int {
-	if flag & (Llongfile | Lshortfile) > 0 {
-		if flag & Lshortfile == 0 {
+	if flag&(Llongfile|Lshortfile) > 0 {
+		if flag&Lshortfile == 0 {
 			return Llongfile
 		} else {
 			return Lshortfile

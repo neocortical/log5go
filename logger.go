@@ -11,15 +11,15 @@ import (
 
 // Inner type of all loggers
 type logger struct {
-	lock        sync.RWMutex
-	level       LogLevel
-	formatter   Formatter
-	appender    Appender
-	timeFormat  string
-	prefix      string
-	lines       int
-	flag        int 				// needed to return by Flags()
-	buf 				[]byte			// buffer for holding formatted log messages
+	lock       sync.RWMutex
+	level      LogLevel
+	formatter  Formatter
+	appender   Appender
+	timeFormat string
+	prefix     string
+	lines      int
+	flag       int    // needed to return by Flags()
+	buf        []byte // buffer for holding formatted log messages
 }
 
 var std = initStd()
@@ -29,7 +29,6 @@ func initStd() (_ *logger) {
 	l, _ := log.(*logger)
 	return l
 }
-
 
 var errLowLevel = errors.New("level too low")
 
@@ -73,7 +72,7 @@ func (l *logger) SetLogLevel(level LogLevel) {
 func (l *logger) WithData(d Data) Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	return &boundLogger{l:l, data:d}
+	return &boundLogger{l: l, data: d}
 }
 
 func (l *logger) Json() Log5Go {
@@ -124,7 +123,7 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	// gather data
 	timeString := ""
 	if l.timeFormat != "" {
-		timeString = now.Format(l.timeFormat)  // TODO: optimize for speed/memory
+		timeString = now.Format(l.timeFormat) // TODO: optimize for speed/memory
 	}
 	levelString := GetLogLevelString(level)
 
@@ -175,7 +174,7 @@ func (l *logger) getDefaultFormat() Formatter {
 func scrubData(data map[string]interface{}) map[string]interface{} {
 	for key, value := range data {
 		if value == nil {
-			continue; // null values OK
+			continue // null values OK
 		}
 		switch reflect.TypeOf(value).Kind() {
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.String:

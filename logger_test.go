@@ -12,48 +12,48 @@ import (
 )
 
 type loggerTest struct {
-	testname string
-	msg string
-	args []interface{}
-	data Data
+	testname   string
+	msg        string
+	args       []interface{}
+	data       Data
 	timeFormat string
-	prefix string
-	formatter Formatter
-	expected string
+	prefix     string
+	formatter  Formatter
+	expected   string
 }
 
 const (
-	Rxdate         					= `[0-9]{4}/[0-9]{2}/[0-9]{2}`
-	Rxtime         					= `[0-9]{2}:[0-9]{2}:[0-9]{2}`
-	Rxlevel									= `(TRACE|DEBUG|INFO|WARN|ERROR|FATAL|CUSTOM)`
-	Rxprefix								= `prefix`
-	Rxcaller								= `[a-zA-Z0-9_\-\/\.]+\.go`
-	Rxline									= `[0-9]+`
-	RxdefaultFmt						= Rxdate + " " + Rxtime + " " + Rxlevel + " : " + Rxmessage
-	RxdefaultPrefixFmt 			= Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ": " + Rxmessage
-	RxdefaultLinesFmt 			= Rxdate + " " + Rxtime + " " + Rxlevel + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
+	Rxdate                  = `[0-9]{4}/[0-9]{2}/[0-9]{2}`
+	Rxtime                  = `[0-9]{2}:[0-9]{2}:[0-9]{2}`
+	Rxlevel                 = `(TRACE|DEBUG|INFO|WARN|ERROR|FATAL|CUSTOM)`
+	Rxprefix                = `prefix`
+	Rxcaller                = `[a-zA-Z0-9_\-\/\.]+\.go`
+	Rxline                  = `[0-9]+`
+	RxdefaultFmt            = Rxdate + " " + Rxtime + " " + Rxlevel + " : " + Rxmessage
+	RxdefaultPrefixFmt      = Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ": " + Rxmessage
+	RxdefaultLinesFmt       = Rxdate + " " + Rxtime + " " + Rxlevel + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
 	RxdefaultPrefixLinesFmt = Rxdate + " " + Rxtime + " " + Rxlevel + " " + Rxprefix + ` \(` + Rxcaller + ":" + Rxline + `\): ` + Rxmessage
-	Rxmessage								= `hello, world`
-	Rxcustomformat 					= Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
-	Rxdata									= `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
+	Rxmessage               = `hello, world`
+	Rxcustomformat          = Rxmessage + ", " + Rxprefix + ", " + Rxlevel + "!!!"
+	Rxdata                  = `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
 )
 
-var loggerTests = []loggerTest {
+var loggerTests = []loggerTest{
 	{"basic", "hello", []interface{}{}, Data{}, "2006", "noshow", NewStringFormatter("%t %l %m"), "^[0-9]{4} {{level}} hello\n$"},
 	{"stdwithutf8", "侍 (%s)", []interface{}{"samurai"}, Data{}, TF_GoStd, "prefix", nil, "^" + Rxdate + " " + Rxtime + " {{level}} prefix: 侍 \\(samurai\\)\n$"},
 }
 
 func TestAllLoggerLevels(t *testing.T) {
 	var buf bytes.Buffer
-	appender := &writerAppender{dest:&buf}
+	appender := &writerAppender{dest: &buf}
 
 	for _, test := range loggerTests {
 		l := &logger{
-			level: LogAll,
-			formatter: test.formatter,
-			appender: appender,
+			level:      LogAll,
+			formatter:  test.formatter,
+			appender:   appender,
 			timeFormat: test.timeFormat,
-			prefix: test.prefix,
+			prefix:     test.prefix,
 		}
 		runLoggerLevelTest(l, &buf, &test, t)
 	}
@@ -196,18 +196,18 @@ func TestDataStringFormatter(t *testing.T) {
 	var buf bytes.Buffer
 	log := Logger(LogAll).ToWriter(&buf).WithFmt("%m")
 
-	runTest(log.WithData(Data{"foo":"bar", "pi":3.14159265359}), &buf, Rxmessage + " " + Rxdata, t)
+	runTest(log.WithData(Data{"foo": "bar", "pi": 3.14159265359}), &buf, Rxmessage+" "+Rxdata, t)
 }
 
 func TestScrubData(t *testing.T) {
 	x := 1
 	var badbuf bytes.Buffer
-	badMap := map[int]string{1:"hi"}
+	badMap := map[int]string{1: "hi"}
 	var okiface interface{} = reflect.ValueOf(x).Interface()
 	var badiface interface{} = reflect.ValueOf(badbuf).Interface()
 	var slice []byte
 	var strct struct{}
-	d := Data{"badMap":badMap, "okiface":okiface, "badiface":badiface, "slice":slice, "strct":strct, "bar":"baz"}
+	d := Data{"badMap": badMap, "okiface": okiface, "badiface": badiface, "slice": slice, "strct": strct, "bar": "baz"}
 
 	d = scrubData(d)
 
@@ -228,8 +228,8 @@ func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {
 
 func getTestLogger(level LogLevel) *logger {
 	return &logger{
-		level: level,
-		appender: &bufferAppender{bytes.Buffer{}},
+		level:      level,
+		appender:   &bufferAppender{bytes.Buffer{}},
 		timeFormat: "2006", // simple
 	}
 }
@@ -246,13 +246,13 @@ func (a *bufferAppender) Append(msg *[]byte, level LogLevel, tstamp time.Time) (
 
 func TestGetSetLevel(t *testing.T) {
 	var buf bytes.Buffer
-	appender := &writerAppender{dest:&buf}
+	appender := &writerAppender{dest: &buf}
 	l := &logger{
-		level: LogAll,
-		formatter: nil,
-		appender: appender,
+		level:      LogAll,
+		formatter:  nil,
+		appender:   appender,
 		timeFormat: TF_GoStd,
-		prefix: "foo",
+		prefix:     "foo",
 	}
 
 	l.SetLogLevel(LogWarn)
@@ -271,11 +271,11 @@ func TestLoggerFatals(t *testing.T) {
 	}
 
 	l := &logger{
-		level: LogAll,
-		formatter: nil,
-		appender: &writerAppender{dest:os.Stdout},
+		level:      LogAll,
+		formatter:  nil,
+		appender:   &writerAppender{dest: os.Stdout},
 		timeFormat: TF_GoStd,
-		prefix: "",
+		prefix:     "",
 	}
 
 	l.GoFatal("jeepers!")
@@ -301,11 +301,11 @@ func TestLoggerFatals(t *testing.T) {
 
 func TestLoggerPanics(t *testing.T) {
 	l := &logger{
-		level: LogAll,
-		formatter: nil,
-		appender: &writerAppender{dest:os.Stdout},
+		level:      LogAll,
+		formatter:  nil,
+		appender:   &writerAppender{dest: os.Stdout},
 		timeFormat: TF_GoStd,
-		prefix: "",
+		prefix:     "",
 	}
 
 	f := func(l *logger, t *testing.T) {
@@ -329,6 +329,6 @@ func TestLoggerPanics(t *testing.T) {
 
 func assertRecoverPanic(t *testing.T) {
 	if r := recover(); r == nil {
-    t.Error("expected panic. got nothing.")
-  }
+		t.Error("expected panic. got nothing.")
+	}
 }

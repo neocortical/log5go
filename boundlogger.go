@@ -20,7 +20,7 @@ type Data map[string]interface{}
 // object can be reused. Calling LogBuilder methods on a boundLogger object result in
 // a NOOP to keep developers from doing silly things.
 type boundLogger struct {
-	l *logger
+	l    *logger
 	lock sync.RWMutex // protects data
 	data Data
 }
@@ -93,7 +93,7 @@ func (l *boundLogger) SetLogLevel(level LogLevel) {
 func (l *boundLogger) Output(calldepth int, s string) error {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
-	return l.l.log(time.Now(), LogInfo, calldepth + 1, s, l.data)
+	return l.l.log(time.Now(), LogInfo, calldepth+1, s, l.data)
 }
 
 func (l *boundLogger) SetOutput(out io.Writer) {
@@ -211,7 +211,7 @@ func (l *boundLogger) WithLine() Log5Go {
 	return l
 }
 
-func (l *boundLogger) WithLn()  Log5Go {
+func (l *boundLogger) WithLn() Log5Go {
 	// NOOP
 	return l
 }

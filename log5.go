@@ -30,7 +30,7 @@ type Log5Go interface {
 // types into the data map; any non-builtin types are scrubbed for compaibility with
 // different formatters.
 type Log5GoData interface {
-  WithData(d Data) Log5Go
+	WithData(d Data) Log5Go
 }
 
 // LogBuilder is the interface for building loggers.

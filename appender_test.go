@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-var appenderTests = map[string]string {
-	"": "\n",
-	"\n": "\n",
+var appenderTests = map[string]string{
+	"":      "\n",
+	"\n":    "\n",
 	"hello": "hello\n",
 }
 

@@ -11,12 +11,12 @@ import (
 // Entry point for building a new logger. Start here. Takes the desired log level.
 func Logger(level LogLevel) Log5Go {
 	logger := logger{
-		level: level,
-		formatter: nil,
-		appender: &writerAppender{dest: os.Stderr, errDest: nil},
+		level:      level,
+		formatter:  nil,
+		appender:   &writerAppender{dest: os.Stderr, errDest: nil},
 		timeFormat: TF_GoStd,
-		prefix: "",
-		lines: 0,
+		prefix:     "",
+		lines:      0,
 	}
 	return &logger
 }
@@ -71,7 +71,7 @@ func (l *logger) WithLine() Log5Go {
 	return l
 }
 
-func (l *logger) WithLn()  Log5Go {
+func (l *logger) WithLn() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	l.lines = Lshortfile

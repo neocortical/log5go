@@ -42,14 +42,14 @@ func NewStringFormatter(pattern string) (sf *StringFormatter) {
 			meta, width := utf8.DecodeRuneInString(pattern)
 			switch meta {
 			case '%', 't', 'l', 'p', 'c', 'n', 'm':
-			  // valid meta-pattern detected. dump any collected literal pattern first
+				// valid meta-pattern detected. dump any collected literal pattern first
 				// dump any literal value we have collected
 				if len(buf) > 0 {
 					sf.parts = append(sf.parts, string(buf))
 					buf = buf[:0]
 				}
 
-				sf.parts = append(sf.parts, "%" + string(meta & 0xff)) // all metas are ascii
+				sf.parts = append(sf.parts, "%"+string(meta&0xff)) // all metas are ascii
 				pattern = pattern[width:]
 			}
 		} else {
@@ -73,9 +73,9 @@ func (f *StringFormatter) Format(timeString, levelString, prefix, caller string,
 		case "%l":
 			*buf = append(*buf, levelString...)
 		case "%p":
-		*buf = append(*buf, prefix...)
+			*buf = append(*buf, prefix...)
 		case "%c":
-		*buf = append(*buf, caller...)
+			*buf = append(*buf, caller...)
 		case "%n":
 			*buf = append(*buf, strconv.FormatUint(uint64(line), 10)...)
 		case "%m":
