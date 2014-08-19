@@ -11,7 +11,7 @@ import (
 
 // Inner type of all loggers
 type logger struct {
-	lock        sync.Mutex
+	lock        sync.RWMutex
 	level       LogLevel
 	formatter   Formatter
 	appender    Appender
@@ -19,6 +19,7 @@ type logger struct {
 	prefix      string
 	lines       int
 	flag        int 				// needed to return by Flags()
+	buf 				[]byte			// buffer for holding formatted log messages
 }
 
 var std = initStd()
@@ -90,8 +91,8 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	var file string
 	var line int
 
-	l.lock.Lock()
-	defer l.lock.Unlock()
+	l.lock.RLock()
+	defer l.lock.RUnlock()
 
 	if level < l.level {
 		return errLowLevel
@@ -99,14 +100,14 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 
 	if l.lines != 0 {
 		// release lock while getting caller info - it's expensive.
-		l.lock.Unlock()
+		l.lock.RUnlock()
 		var ok bool
 		_, file, line, ok = runtime.Caller(calldepth)
 		if !ok {
 			file = "???"
 			line = 0
 		}
-		l.lock.Lock()
+		l.lock.RLock()
 
 		if l.lines == Lshortfile {
 			short := file
@@ -120,22 +121,23 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 		}
 	}
 
+	// gather data
 	timeString := ""
 	if l.timeFormat != "" {
-		timeString = now.Format(l.timeFormat)
+		timeString = now.Format(l.timeFormat)  // TODO: optimize for speed/memory
 	}
 	levelString := GetLogLevelString(level)
 
 	data = scrubData(data)
 
-	var logMessage []byte
-	if l.formatter != nil {
-		logMessage = l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
+	l.buf = l.buf[:0]
+	if l.formatter == nil {
+		l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg, data, &l.buf)
 	} else {
-		logMessage = l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg, data)
+		l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg, data, &l.buf)
 	}
 
-	return l.appender.Append(logMessage, level, now)
+	return l.appender.Append(&l.buf, level, now)
 }
 
 // getDefaultFormat method inspects the logger and applies the appropriate default

@@ -20,11 +20,11 @@ var fileAppenderMap = make(map[string]*fileAppender)
 var fileAppenderMapLock = sync.Mutex{}
 var fileRollerRunning = false
 
-func (a *fileAppender) Append(msg []byte, level LogLevel, tstamp time.Time) error {
+func (a *fileAppender) Append(msg *[]byte, level LogLevel, tstamp time.Time) error {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 
-	msg = TerminateMessageWithNewline(msg)
+	TerminateMessageWithNewline(msg)
 
 	if a.shouldRoll(tstamp) {
 		a.doRoll()
@@ -34,7 +34,7 @@ func (a *fileAppender) Append(msg []byte, level LogLevel, tstamp time.Time) erro
 	if a.f == nil {
 		return fmt.Errorf("file couldn't be opened")
 	}
-	_, err := a.f.Write(msg)
+	_, err := a.f.Write(*msg)
 	return err
 }
 

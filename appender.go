@@ -9,16 +9,14 @@ import (
 // and to arbitrary writers. Developers can extend log5go by implementing a custom
 // Appender and configuring their logger with ToAppender(a).
 type Appender interface {
-	Append(msg []byte, level LogLevel, tstamp time.Time) error
+	Append(msg *[]byte, level LogLevel, tstamp time.Time) error
 }
 
 // TerminateMessageWithNewline function tests msg content and adds a terminating
 // newline if not there already. If you write a custom appender and want line
 // termination, you should call this function on the msg before writing it.
-func TerminateMessageWithNewline(msg []byte) []byte {
-	if len(msg) == 0 || msg[len(msg) - 1] != '\n' {
-		return append(msg, '\n')
-	} else {
-		return msg
+func TerminateMessageWithNewline(msg *[]byte) {
+	if len(*msg) == 0 || (*msg)[len(*msg) - 1] != '\n' {
+		*msg = append(*msg, '\n')
 	}
 }

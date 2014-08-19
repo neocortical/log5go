@@ -65,33 +65,38 @@ func NewStringFormatter(pattern string) (sf *StringFormatter) {
 	return sf
 }
 
-func (f *StringFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data) []byte {
-	var buf bytes.Buffer
-	if data != nil {
-		msg = appendData(msg, data)
-	}
+func (f *StringFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, buf *[]byte) {
 	for _, part := range f.parts {
 		switch part {
 		case "%t":
-			buf.WriteString(timeString)
+			*buf = append(*buf, timeString...)
+//			buf.WriteString(timeString)
 		case "%l":
-		  buf.WriteString(levelString)
+			*buf = append(*buf, levelString...)
+//		  buf.WriteString(levelString)
 		case "%p":
-			buf.WriteString(prefix)
+		*buf = append(*buf, prefix...)
+//			buf.WriteString(prefix)
 		case "%c":
-			buf.WriteString(caller)
+		*buf = append(*buf, caller...)
+//			buf.WriteString(caller)
 		case "%n":
-			buf.WriteString(strconv.FormatUint(uint64(line), 10))
+			*buf = append(*buf, strconv.FormatUint(uint64(line), 10)...)
+//			buf.WriteString(strconv.FormatUint(uint64(line), 10))
 		case "%m":
-		  buf.WriteString(msg)
+			if data != nil {
+				msg = appendData(msg, data)
+			}
+			*buf = append(*buf, msg...)
+//		  buf.WriteString(msg)
 		case "%%":
-			buf.WriteRune('%')
+			*buf = append(*buf, '%')
+//			buf.WriteRune('%')
 		default:
-			buf.WriteString(part)
+			*buf = append(*buf, part...)
+//			buf.WriteString(part)
 		}
 	}
-
-	return buf.Bytes()
 }
 
 func appendData(msg string, data Data) string {

@@ -18,7 +18,7 @@ type jsonLog struct{
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
-func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data) []byte {
+func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, out *[]byte) {
 	output := jsonLog{
 		Time: timeString,
 		Level: levelString,
@@ -28,11 +28,9 @@ func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, l
 		Data: data,
 	}
 
-	serialized, err := json.Marshal(output)
-	if err != nil {
-		return []byte{}
-	} else {
-		return serialized
+	serialized, err := json.Marshal(output) // TODO: remove intermediate string
+	if err == nil {
+		*out = append(*out, serialized...)
 	}
 }
 

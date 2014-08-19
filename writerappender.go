@@ -12,16 +12,16 @@ type writerAppender struct {
 	errDest io.Writer
 }
 
-func (a *writerAppender) Append(msg []byte, level LogLevel, tstamp time.Time) (err error) {
+func (a *writerAppender) Append(msg *[]byte, level LogLevel, tstamp time.Time) (err error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 
-	msg = TerminateMessageWithNewline(msg)
+	TerminateMessageWithNewline(msg)
 
 	if a.errDest != nil && level >= LogWarn {
-		_, err = a.errDest.Write(msg)
+		_, err = a.errDest.Write(*msg)
 	} else {
-		_, err = a.dest.Write(msg)
+		_, err = a.dest.Write(*msg)
 	}
 
 	return err
