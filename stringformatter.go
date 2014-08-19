@@ -70,31 +70,23 @@ func (f *StringFormatter) Format(timeString, levelString, prefix, caller string,
 		switch part {
 		case "%t":
 			*buf = append(*buf, timeString...)
-//			buf.WriteString(timeString)
 		case "%l":
 			*buf = append(*buf, levelString...)
-//		  buf.WriteString(levelString)
 		case "%p":
 		*buf = append(*buf, prefix...)
-//			buf.WriteString(prefix)
 		case "%c":
 		*buf = append(*buf, caller...)
-//			buf.WriteString(caller)
 		case "%n":
 			*buf = append(*buf, strconv.FormatUint(uint64(line), 10)...)
-//			buf.WriteString(strconv.FormatUint(uint64(line), 10))
 		case "%m":
 			if data != nil {
 				msg = appendData(msg, data)
 			}
 			*buf = append(*buf, msg...)
-//		  buf.WriteString(msg)
 		case "%%":
 			*buf = append(*buf, '%')
-//			buf.WriteRune('%')
 		default:
 			*buf = append(*buf, part...)
-//			buf.WriteString(part)
 		}
 	}
 }
