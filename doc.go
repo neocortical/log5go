@@ -40,7 +40,7 @@ Register a stdout logger and retrieve it in another part of your code:
 package log5go
 
 // Package version info
-const VERSION = "0.13.4"
+const VERSION = "0.13.5"
 const MAJOR_VERSION = 0
 const MINOR_VERSION = 13
-const PATCH_VERSION = 4
+const PATCH_VERSION = 5
