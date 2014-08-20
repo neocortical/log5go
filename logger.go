@@ -90,8 +90,8 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	var file string
 	var line int
 
-	l.lock.RLock()
-	defer l.lock.RUnlock()
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
 	if level < l.level {
 		return errLowLevel
@@ -99,14 +99,14 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 
 	if l.lines != 0 {
 		// release lock while getting caller info - it's expensive.
-		l.lock.RUnlock()
+		l.lock.Unlock()
 		var ok bool
 		_, file, line, ok = runtime.Caller(calldepth)
 		if !ok {
 			file = "???"
 			line = 0
 		}
-		l.lock.RLock()
+		l.lock.Lock()
 
 		if l.lines == Lshortfile {
 			short := file
