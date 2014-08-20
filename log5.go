@@ -113,8 +113,8 @@ const (
 	RollWeekly												// Rotate files once per week
 )
 
-// SaveAllOldLogs used as an argument to WithFileRotation(, keepNLogs). Disables deleting of old log files.
-const SaveAllOldLogs = -1
+// SaveAllLogs used as an argument to WithFileRotation(, keepNLogs). Disables deleting of old log files.
+const SaveAllLogs = -1
 
 // Gets a log by looking it up by name in the internal registry.
 func GetLog(key string) (_ Log5Go, err error) {
