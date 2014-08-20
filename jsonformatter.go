@@ -28,7 +28,7 @@ func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, l
 		Data:   data,
 	}
 
-	serialized, err := json.Marshal(output) // TODO: remove intermediate string
+	serialized, err := json.Marshal(output)
 	if err == nil {
 		*out = append(*out, serialized...)
 	}
