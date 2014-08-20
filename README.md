@@ -236,15 +236,15 @@ MBP, 2.3 GHz Intel i7, 8GB 1333MHz DDR3, OS X 10.9.4
 ### Results:
 
 ```
-pkg/log: real: 35.62, user: 14.13, sys: 21.30, Max heap: 509KB, Total bytes allocated: 317MB, GCs: 1233
+pkg/log: real: 33.24, user: 12.03, sys: 21.12, Max heap: 591KB, Total bytes allocated: 160MB, GCs: 570
 
-log5go:  real: 45.87, user: 22.18, sys: 23.59, Max heap: 596KB, Total bytes allocated: 476MB, GCs: 1583
+log5go:  real: 47.40, user: 22.82, sys: 24.46, Max heap: 582KB, Total bytes allocated: 480MB, GCs: 1611
 ```
 
 ### Conclusion:
 
-Log5Go is reasonably fast and memory-efficient and in the same ballpark as pkg/log but could be improved
-further. More optimization needs to be done, particularly with JSON formatting.
+Log5Go is reasonably fast and memory-efficient and in the same ballpark as pkg/log but
+allocates much more memory and could be improved further. 
 
 
 ROADMAP
