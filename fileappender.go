@@ -11,6 +11,7 @@ import (
 type fileAppender struct {
 	lock          sync.Mutex
 	f             *os.File
+	fname					string 				// full path to file
 	lastOpenTime  time.Time
 	nextRollTime  time.Time
 	rollFrequency rollFrequency
@@ -21,8 +22,8 @@ var fileAppenderMap = make(map[string]*fileAppender)
 var fileAppenderMapLock = sync.Mutex{}
 var fileRollerRunning = false
 
-var fileWatcherPeriod time.Duration = time.Second * 10
-var fileReopenRefractoryPeriod time.Duration = time.Minute
+var fileWatcherPeriod time.Duration = time.Second
+var fileReopenRefractoryPeriod time.Duration = time.Second
 
 func (a *fileAppender) Append(msg []byte, level LogLevel, tstamp time.Time) error {
 	a.lock.Lock()
@@ -53,7 +54,7 @@ func (a *fileAppender) shouldRoll(tstamp time.Time) bool {
 
 // Actually roll the log file. Must be in lock already.
 func (a *fileAppender) doRoll() {
-	absoluteFilename := a.f.Name()
+	absoluteFilename := a.fname
 	dir, filename := filepath.Split(absoluteFilename)
 	a.f.Close()
 
@@ -88,7 +89,7 @@ func generateArchiveFilename(fname string, rollTime time.Time, freq rollFrequenc
 
 // validFile method returns true iff file is open and valid. Caller should protect with lock.
 func (a *fileAppender) validFile() bool {
-	_, err := a.f.Stat()
+	_, err := os.Stat(a.f.Name())
 	return err == nil
 }
 
@@ -100,8 +101,8 @@ func (a *fileAppender) shouldAttemptFileReopen() bool {
 
 func (a *fileAppender) reopenFile() {
 	a.lastOpenTime = time.Now()
-	newFile, err := os.OpenFile(a.f.Name(), os.O_APPEND | os.O_CREATE, 0666)
-	if err != nil {
+	newFile, err := os.OpenFile(a.fname, os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	if err == nil {
 		a.f = newFile
 	} else {
 		a.f.Close() // ignore errors

@@ -93,13 +93,14 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 	fileAppenderMapLock.Lock()
 	var appender *fileAppender = fileAppenderMap[fullFilename]
 	if appender == nil {
-		logfile, err := os.Create(fullFilename)
+		logfile, err := os.OpenFile(fullFilename, os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
 		if err != nil {
 			fileAppenderMapLock.Unlock()
 			return l
 		}
 		appender = &fileAppender{
 			f: logfile,
+			fname: fullFilename,
 			lastOpenTime: time.Now(),
 			nextRollTime: time.Now(),
 			rollFrequency: RollNone,

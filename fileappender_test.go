@@ -46,6 +46,7 @@ func TestWatchFiles(t *testing.T) {
 	}
 	a := &fileAppender{
 		f: logfile,
+		fname: fname,
 		lastOpenTime: time.Now(),
 		nextRollTime: time.Now(),
 		rollFrequency: RollNone,
@@ -76,6 +77,7 @@ func TestAutoReopen(t *testing.T) {
 	}
 	a := &fileAppender{
 		f: logfile,
+		fname: fname,
 		lastOpenTime: time.Now(),
 		nextRollTime: time.Now(),
 		rollFrequency: RollNone,
