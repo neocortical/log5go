@@ -7,13 +7,13 @@ type LogLevel uint16
 // Standard log levels. Map to intergers separated by 100 to allow for custom
 // log levels to be intermingled with standard ones.
 const (
-	LogAll LogLevel = iota * 100	// Log all messages, regardless of level
-	LogTrace											// TRACE log leve/threshold
-	LogDebug											// DEBUG log leve/threshold
-	LogInfo												// INFO log leve/threshold
-	LogWarn												// WARN log leve/threshold
-	LogError											// ERROR log leve/threshold
-	LogFatal											// FATAL log leve/threshold
+	LogAll   LogLevel = iota * 100 // Log all messages, regardless of level
+	LogTrace                       // TRACE log leve/threshold
+	LogDebug                       // DEBUG log leve/threshold
+	LogInfo                        // INFO log leve/threshold
+	LogWarn                        // WARN log leve/threshold
+	LogError                       // ERROR log leve/threshold
+	LogFatal                       // FATAL log leve/threshold
 )
 
 // maps log levels to prefix strings describing each. extensible
@@ -44,9 +44,22 @@ func DeregisterLogLevel(level LogLevel) {
 	levelMapLock.Unlock()
 }
 
-// Get the string value of a LogLevel if it is registered
+// GetLogLevelString gets the string value of a LogLevel if it is registered
 func GetLogLevelString(level LogLevel) string {
 	levelMapLock.RLock()
 	defer levelMapLock.RUnlock()
 	return levelMap[level]
+}
+
+// LogLevelForString returns a LogLevel whose string matches the specified string.
+// Duplicate level strings will produce indeterminate results. Returns LogAll if string not found.
+func LogLevelForString(val string) LogLevel {
+	levelMapLock.Lock()
+	defer levelMapLock.Unlock()
+	for k, v := range levelMap {
+		if v == val {
+			return k
+		}
+	}
+	return LogAll
 }
