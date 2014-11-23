@@ -181,6 +181,11 @@ func (l *boundLogger) GoPanicln(v ...interface{}) {
 
 //-- LogBuilder interface -----------------
 
+func (l *boundLogger) Clone() Log5Go {
+	// NOOP
+	return l
+}
+
 func (l *boundLogger) WithTimeFmt(format string) Log5Go {
 	// NOOP
 	return l
@@ -246,7 +251,7 @@ func (l *boundLogger) Json() Log5Go {
 	return l
 }
 
-func (l *boundLogger) Register(key string) (_ Log5Go, _ error) {
+func (l *boundLogger) Register(key string) Log5Go {
 	// NOOP
-	return l, fmt.Errorf("can't call register after calling WithData()")
+	return l
 }

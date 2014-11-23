@@ -15,16 +15,11 @@ var loggerRegistry = &registry{
 	sync.RWMutex{},
 }
 
-func (r *registry) Put(key string, logger Log5Go) error {
+func (r *registry) Put(key string, logger Log5Go) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	if _, ok := r.registry[key]; ok {
-		return fmt.Errorf("logger already exists for key: %s", key)
-	}
-
 	r.registry[key] = logger
-	return nil
 }
 
 func (r *registry) Get(key string) (_ Log5Go, _ error) {

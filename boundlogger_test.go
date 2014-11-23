@@ -169,14 +169,6 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 	if bl2 != bl || l.appender != appender {
 		t.Error("appender changed")
 	}
-
-	bl2, err := bl.Register("derp")
-	if bl2 != bl || err == nil {
-		t.Error("able to register")
-	}
-	if bl2, err = GetLog("derp"); bl2 != nil || err == nil {
-		t.Error("able to get log that should not have been registered")
-	}
 }
 
 func TestBoundLoggerFatals(t *testing.T) {

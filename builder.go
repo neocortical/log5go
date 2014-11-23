@@ -20,6 +20,21 @@ func Logger(level LogLevel) Log5Go {
 	return &logger
 }
 
+func (l *logger) Clone() Log5Go {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return &logger{
+		level:      l.level,
+		formatter:  l.formatter,
+		appender:   l.appender,
+		timeFormat: l.timeFormat,
+		prefix:     l.prefix,
+		lines:      l.lines,
+		flag:       l.flag,
+	}
+}
+
 // Add a custom format to the logger
 func (l *logger) WithTimeFmt(format string) Log5Go {
 	l.lock.Lock()
@@ -93,18 +108,18 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 	fileAppenderMapLock.Lock()
 	var appender *fileAppender = fileAppenderMap[fullFilename]
 	if appender == nil {
-		logfile, err := os.OpenFile(fullFilename, os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+		logfile, err := os.OpenFile(fullFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fileAppenderMapLock.Unlock()
 			return l
 		}
 		appender = &fileAppender{
-			f: logfile,
-			fname: fullFilename,
-			lastOpenTime: time.Now(),
-			nextRollTime: time.Now(),
+			f:             logfile,
+			fname:         fullFilename,
+			lastOpenTime:  time.Now(),
+			nextRollTime:  time.Now(),
 			rollFrequency: RollNone,
-			keepNLogs: SaveAllLogs,
+			keepNLogs:     SaveAllLogs,
 		}
 		fileAppenderMap[fullFilename] = appender
 	}
@@ -170,7 +185,7 @@ func (l *logger) WithFmt(format string) Log5Go {
 
 // Build and register the logger you have been configuring. Returns the logger, or any errors
 // that have been encountered during the build/register process.
-func (l *logger) Register(key string) (_ Log5Go, _ error) {
-	err := loggerRegistry.Put(key, l)
-	return l, err
+func (l *logger) Register(key string) Log5Go {
+	loggerRegistry.Put(key, l)
+	return l
 }

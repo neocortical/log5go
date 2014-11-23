@@ -7,18 +7,10 @@ import (
 func TestPutAndGet(t *testing.T) {
 	log := Logger(LogAll).ToStdout()
 
-	err := loggerRegistry.Put("foo", log)
-	if err != nil {
-		t.Errorf("error putting logger into registry: %v", err)
-	}
+	loggerRegistry.Put("foo", log)
 
-	log, err = loggerRegistry.Get("foo")
+	log, err := loggerRegistry.Get("foo")
 	if err != nil {
 		t.Errorf("error getting logger from registry: %v", err)
-	}
-
-	err = loggerRegistry.Put("foo", log)
-	if err == nil {
-		t.Error("expected error when putting logger in registry with duplicate key")
 	}
 }

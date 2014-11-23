@@ -216,22 +216,13 @@ func TestRegister(t *testing.T) {
 		t.Error("log1 and log2 should not be equal")
 	}
 
-	log3, err := Logger(LogInfo).ToStdout().Register("foobar")
-	if err != nil {
-		t.Errorf("expected no error but got %v", err)
-	}
+	log3 := Logger(LogInfo).ToStdout().Register("foobar")
 	log4, err := GetLog("foobar")
 	if err != nil {
 		t.Errorf("Expected no error but got %v", err)
 	}
 	if log3 != log4 {
 		t.Error("log3 and log4 should be equal but aren't")
-	}
-
-	// can't reregister a logger to the same name
-	_, err = Logger(LogInfo).ToStdout().Register("foobar")
-	if err == nil {
-		t.Error("expected error trying to register name twice but got none")
 	}
 }
 
