@@ -100,19 +100,17 @@ type LogBuilder interface {
 
 	// Register registers a logger in the log5go registry, allowing it to be retrieved from anywhere in your program
 	Register(key string) (Log5Go, error)
-
-	SetForApplication() Log5Go
 }
 
 type rollFrequency uint8
 
 // Log rotation frequencies. Daily rotates at midnight, weekly rotates on Sunday at midnight
 const (
-	RollNone     rollFrequency = iota // Don't do file rotation
-	RollMinutely                      // Rotate files once per minute
-	RollHourly                        // Rotate files once per hour
-	RollDaily                         // Rotate files once per day
-	RollWeekly                        // Rotate files once per week
+	RollNone     rollFrequency = iota	// Don't do file rotation
+	RollMinutely               				// Rotate files once per minute
+	RollHourly												// Rotate files once per hour
+	RollDaily													// Rotate files once per day
+	RollWeekly												// Rotate files once per week
 )
 
 // SaveAllLogs used as an argument to WithFileRotation(, keepNLogs). Disables deleting of old log files.
@@ -123,13 +121,9 @@ func GetLog(key string) (_ Log5Go, err error) {
 	return loggerRegistry.Get(key)
 }
 
-func GetAppLogger() Log5Go {
-	return applicationLogger
-}
-
 // Standard timestamp formats. You can use any format from the time package or
 // roll your own.
 const (
-	TF_GoStd = "2006/01/02 15:04:05"        // Default
-	TF_NCSA  = "02/Jan/2006:15:04:05 -0700" // NCSA standard time format
+	TF_GoStd = "2006/01/02 15:04:05" 				// Default
+	TF_NCSA  = "02/Jan/2006:15:04:05 -0700"	// NCSA standard time format
 )

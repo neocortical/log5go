@@ -250,8 +250,3 @@ func (l *boundLogger) Register(key string) (_ Log5Go, _ error) {
 	// NOOP
 	return l, fmt.Errorf("can't call register after calling WithData()")
 }
-
-func (l *boundLogger) SetForApplication() Log5Go {
-	// NOOP
-	return l
-}
