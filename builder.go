@@ -93,18 +93,18 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 	fileAppenderMapLock.Lock()
 	var appender *fileAppender = fileAppenderMap[fullFilename]
 	if appender == nil {
-		logfile, err := os.OpenFile(fullFilename, os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+		logfile, err := os.OpenFile(fullFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fileAppenderMapLock.Unlock()
 			return l
 		}
 		appender = &fileAppender{
-			f: logfile,
-			fname: fullFilename,
-			lastOpenTime: time.Now(),
-			nextRollTime: time.Now(),
+			f:             logfile,
+			fname:         fullFilename,
+			lastOpenTime:  time.Now(),
+			nextRollTime:  time.Now(),
 			rollFrequency: RollNone,
-			keepNLogs: SaveAllLogs,
+			keepNLogs:     SaveAllLogs,
 		}
 		fileAppenderMap[fullFilename] = appender
 	}
@@ -173,4 +173,9 @@ func (l *logger) WithFmt(format string) Log5Go {
 func (l *logger) Register(key string) (_ Log5Go, _ error) {
 	err := loggerRegistry.Put(key, l)
 	return l, err
+}
+
+func (l *logger) SetForApplication() Log5Go {
+	applicationLogger = l
+	return l
 }

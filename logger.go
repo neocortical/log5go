@@ -24,6 +24,9 @@ type logger struct {
 
 var std = initStd()
 
+// applicationLogger stores the process-wide logger that can be set via SetForApplication()
+var applicationLogger = std
+
 func initStd() (_ *logger) {
 	log := Logger(LogAll).ToStderr().WithTimeFmt(TF_GoStd)
 	l, _ := log.(*logger)
