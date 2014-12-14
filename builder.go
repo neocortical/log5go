@@ -31,7 +31,6 @@ func (l *logger) Clone() Log5Go {
 		timeFormat: l.timeFormat,
 		prefix:     l.prefix,
 		lines:      l.lines,
-		flag:       l.flag,
 	}
 }
 
@@ -78,17 +77,17 @@ func (l *logger) WithPrefix(prefix string) Log5Go {
 	return l
 }
 
-func (l *logger) WithLine() Log5Go {
+func (l *logger) WithLongLines() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.lines = Llongfile
+	l.lines = LogLinesLong
 	return l
 }
 
-func (l *logger) WithLn() Log5Go {
+func (l *logger) WithShortLines() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.lines = Lshortfile
+	l.lines = LogLinesShort
 	return l
 }
 
@@ -106,7 +105,7 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 	fullFilename := filepath.Join(expandedDir, filename)
 
 	fileAppenderMapLock.Lock()
-	var appender *fileAppender = fileAppenderMap[fullFilename]
+	var appender = fileAppenderMap[fullFilename]
 	if appender == nil {
 		logfile, err := os.OpenFile(fullFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {

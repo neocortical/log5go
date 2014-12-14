@@ -17,10 +17,17 @@ type logger struct {
 	appender   Appender
 	timeFormat string
 	prefix     string
-	lines      int
-	flag       int    // needed to return by Flags()
+	lines      LogLines
 	buf        []byte // buffer for holding formatted log messages
 }
+
+type LogLines int
+
+const (
+	LogLinesNone  LogLines = 0
+	LogLinesShort LogLines = 1
+	LogLinesLong  LogLines = 2
+)
 
 var std = initStd()
 
@@ -97,7 +104,7 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 		return errLowLevel
 	}
 
-	if l.lines != 0 {
+	if l.lines != LogLinesNone {
 		// release lock while getting caller info - it's expensive.
 		l.lock.Unlock()
 		var ok bool
@@ -108,7 +115,7 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 		}
 		l.lock.Lock()
 
-		if l.lines == Lshortfile {
+		if l.lines == LogLinesShort {
 			short := file
 			for i := len(file) - 1; i > 0; i-- {
 				if file[i] == '/' {

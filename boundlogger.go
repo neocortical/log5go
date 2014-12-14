@@ -88,97 +88,6 @@ func (l *boundLogger) SetLogLevel(level LogLevel) {
 	// NOOP
 }
 
-//-- GoLogger interface ------------------
-
-func (l *boundLogger) Output(calldepth int, s string) error {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	return l.l.log(time.Now(), LogInfo, calldepth+1, s, l.data)
-}
-
-func (l *boundLogger) SetOutput(out io.Writer) {
-	// NOOP
-}
-
-func (l *boundLogger) Flags() int {
-	return l.l.Flags()
-}
-
-func (l *boundLogger) SetFlags(flag int) {
-	// NOOP
-}
-
-func (l *boundLogger) Prefix() string {
-	return l.l.Prefix()
-}
-
-func (l *boundLogger) SetPrefix(prefix string) {
-	// NOOP
-}
-
-func (l *boundLogger) Printf(format string, v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, v...), l.data)
-}
-
-func (l *boundLogger) Print(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogInfo, 2, fmt.Sprint(v...), l.data)
-}
-
-func (l *boundLogger) Println(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogInfo, 2, fmt.Sprintln(v...), l.data)
-}
-
-func (l *boundLogger) GoFatal(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogFatal, 2, fmt.Sprint(v...), l.data)
-	exitFunc(1)
-}
-
-func (l *boundLogger) GoFatalf(format string, v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, v...), l.data)
-	exitFunc(1)
-}
-
-func (l *boundLogger) GoFatalln(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintln(v...), l.data)
-	exitFunc(1)
-}
-
-func (l *boundLogger) GoPanic(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	s := fmt.Sprint(v...)
-	l.l.log(time.Now(), LogFatal, 2, s, l.data)
-	panic(s)
-}
-
-func (l *boundLogger) GoPanicf(format string, v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	s := fmt.Sprintf(format, v...)
-	l.l.log(time.Now(), LogFatal, 2, s, l.data)
-	panic(s)
-}
-
-func (l *boundLogger) GoPanicln(v ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	s := fmt.Sprintln(v...)
-	l.l.log(time.Now(), LogFatal, 2, s, l.data)
-	panic(s)
-}
-
 //-- LogBuilder interface -----------------
 
 func (l *boundLogger) Clone() Log5Go {
@@ -211,12 +120,12 @@ func (l *boundLogger) WithPrefix(prefix string) Log5Go {
 	return l
 }
 
-func (l *boundLogger) WithLine() Log5Go {
+func (l *boundLogger) WithLongLines() Log5Go {
 	// NOOP
 	return l
 }
 
-func (l *boundLogger) WithLn() Log5Go {
+func (l *boundLogger) WithShortLines() Log5Go {
 	// NOOP
 	return l
 }

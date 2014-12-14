@@ -263,15 +263,15 @@ func TestWithLines(t *testing.T) {
 		t.Errorf("expected default of no lines but got %d", ll.lines)
 	}
 
-	l = Logger(LogAll).WithLn()
+	l = Logger(LogAll).WithShortLines()
 	ll, _ = l.(*logger)
-	if ll.lines != Lshortfile {
+	if ll.lines != LogLinesShort {
 		t.Errorf("expected short lines but got %d", ll.lines)
 	}
 
-	l = Logger(LogAll).WithLine()
+	l = Logger(LogAll).WithLongLines()
 	ll, _ = l.(*logger)
-	if ll.lines != Llongfile {
+	if ll.lines != LogLinesLong {
 		t.Errorf("expected long lines but got %d", ll.lines)
 	}
 }

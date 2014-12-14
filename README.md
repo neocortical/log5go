@@ -5,7 +5,10 @@ log5go
 
 Very loosely based on the (in)famous log4j Java logging library, but uncluttered, Go-like, and awesome.
 
-Log5Go is *mostly* compatible with Go's log package, and is almost a drop-in replacement. See section on replacing the Go logger for details.
+Log5Go is no longer compatible with Go's log package. I believe that Log5Go is an improvement on Go's logging paradigm for the following reasons:
+* Additional functionality such as registry, log levels, data binding, and log file rotation
+* The Go logger's Fatal and Panic methods have the side effect of stopping the program, which I believe is inappropriate for a logging package
+
 
 [![Build Status](https://travis-ci.org/neocortical/log5go.svg?branch=master)](https://travis-ci.org/neocortical/log5go) [![Coverage](http://gocover.io/_badge/github.com/neocortical/log5go?v=1)](http://gocover.io/github.com/neocortical/log5go?v=1) [![GoDoc](https://godoc.org/github.com/neocortical/log5go?status.svg)](https://godoc.org/github.com/neocortical/log5go)
 
@@ -162,18 +165,6 @@ Features
 * Console log can send errors to stderr instead of stdout
 * Extensible through custom appenders
 
-Replacing Go's Logger
-=====================
-
-Log5Go is almost a drop-in replacement for Go's built-in log package. Due to some of
-Log5Go's design decisions, there are a couple of incompatibilities that may need to be
-dealt with. Here are the steps to upgrade from the standard log package to Log5Go:
-
-* Change all imports from import "log" to import log "github.com/neocortical/log5go"
-* Change all calls to Panic(), Fatal(), and their variants to GoPanic(), GoFatal(), etc. (Print() and similar are fine)
-* If your code passes logs around, change all references from *Logger to Log5Go
-* Log output format is different from Go's. See the next section for details
-
 
 Log Format
 ==========
@@ -244,7 +235,7 @@ log5go:  real: 47.40, user: 22.82, sys: 24.46, Max heap: 582KB, Total bytes allo
 ### Conclusion:
 
 Log5Go is reasonably fast and memory-efficient and in the same ballpark as pkg/log but
-allocates much more memory and could be improved further. 
+allocates much more memory and could be improved further.
 
 
 ROADMAP
@@ -252,7 +243,7 @@ ROADMAP
 
 * HTML structured layout
 * syslog support (better than Go's native support)
-* Performance benchmarking and tuning
+* Futher performance benchmarking and tuning
 * log chaining?
 * 1.0 (stable API) release
 

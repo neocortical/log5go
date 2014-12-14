@@ -87,21 +87,6 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 		data: Data{},
 	}
 
-	bl.SetOutput(os.Stdout)
-	if l.appender != appender {
-		t.Error("appender changed")
-	}
-
-	bl.SetFlags(1)
-	if l.flag != 0 {
-		t.Error("appender changed")
-	}
-
-	bl.SetPrefix("bar")
-	if l.prefix != "foo" {
-		t.Error("prefix changed")
-	}
-
 	bl2 := bl.WithTimeFmt("2006")
 	if bl2 != bl || l.timeFormat != TF_GoStd {
 		t.Error("time format changed")
@@ -127,13 +112,13 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 		t.Error("prefix changed")
 	}
 
-	bl2 = bl.WithLine()
-	if bl2 != bl || l.lines != 0 || l.flag != 0 {
+	bl2 = bl.WithLongLines()
+	if bl2 != bl || l.lines != 0 {
 		t.Error("lines changed")
 	}
 
-	bl2 = bl.WithLn()
-	if bl2 != bl || l.lines != 0 || l.flag != 0 {
+	bl2 = bl.WithShortLines()
+	if bl2 != bl || l.lines != 0 {
 		t.Error("lines changed")
 	}
 
@@ -169,75 +154,4 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 	if bl2 != bl || l.appender != appender {
 		t.Error("appender changed")
 	}
-}
-
-func TestBoundLoggerFatals(t *testing.T) {
-	exitCalled := 0
-	exitFunc = func(i int) {
-		exitCalled = i
-	}
-
-	inner := &logger{
-		level:      LogAll,
-		formatter:  nil,
-		appender:   &writerAppender{dest: os.Stdout},
-		timeFormat: TF_GoStd,
-		prefix:     "",
-	}
-	l := &boundLogger{
-		l:    inner,
-		data: Data{},
-	}
-
-	l.GoFatal("jeepers!")
-	if exitCalled != 1 {
-		t.Error("expected exit called, but wasn't")
-	}
-
-	exitCalled = 0
-	l.GoFatalf("yoinks!")
-	if exitCalled != 1 {
-		t.Error("expected exit called, but wasn't")
-	}
-
-	exitCalled = 0
-	l.GoFatalln("aye carumba!")
-	if exitCalled != 1 {
-		t.Error("expected exit called, but wasn't")
-	}
-
-	// cleanup
-	exitFunc = os.Exit
-}
-
-func TestBoundLoggerPanics(t *testing.T) {
-	inner := &logger{
-		level:      LogAll,
-		formatter:  nil,
-		appender:   &writerAppender{dest: os.Stdout},
-		timeFormat: TF_GoStd,
-		prefix:     "",
-	}
-	l := &boundLogger{
-		l:    inner,
-		data: Data{},
-	}
-
-	f := func(l *boundLogger, t *testing.T) {
-		defer assertRecoverPanic(t)
-		l.GoPanic("aiyeee!")
-	}
-	f(l, t)
-
-	f = func(l *boundLogger, t *testing.T) {
-		defer assertRecoverPanic(t)
-		l.GoPanicf("[wilhelm scream]!")
-	}
-	f(l, t)
-
-	f = func(l *boundLogger, t *testing.T) {
-		defer assertRecoverPanic(t)
-		l.GoPanicln("where am i?!")
-	}
-	f(l, t)
 }

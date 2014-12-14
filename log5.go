@@ -34,9 +34,6 @@ type Log5Go interface {
 	// SetLogLevel sets the threshold that log messages must meet to be logged
 	SetLogLevel(level LogLevel)
 
-	// Go pkg/log compatibility. See the GoLogger interface for details
-	GoLogger
-
 	// LogBuilder contains methods for creating new logs using a builder pattern. See the LogBuilder interface for details.
 	LogBuilder
 
@@ -89,11 +86,11 @@ type LogBuilder interface {
 	// WithPrefix sets a custom prefix that will appear in all logged messages
 	WithPrefix(prefix string) Log5Go
 
-	// WithLine adds full caller information (/full/path/to/file.go:linenum) to logged messages
-	WithLine() Log5Go
+	// WithLongLines adds full caller information (/full/path/to/file.go:linenum) to logged messages
+	WithLongLines() Log5Go
 
-	// WithLn adds partial caller info (file.go:linenum) to logged messages
-	WithLn() Log5Go
+	// WithShortLines adds partial caller info (file.go:linenum) to logged messages
+	WithShortLines() Log5Go
 
 	// WithFmt sets a custom string format for log messages. See StringFormatter for details
 	WithFmt(format string) Log5Go
