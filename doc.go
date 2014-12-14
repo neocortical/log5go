@@ -42,5 +42,5 @@ package log5go
 // Package version info
 const VERSION = "0.14.0"
 const MAJOR_VERSION = 0
-const MINOR_VERSION = 14
+const MINOR_VERSION = 15
 const PATCH_VERSION = 0
