@@ -2,24 +2,31 @@ package log5go
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestRegisterLogLevel(t *testing.T) {
-	if len(levelMap) != 7 {
-		t.Errorf("error map not initialized to correct size")
-	}
+func Test_ShouldHaveTenInitialLevels(t *testing.T) {
+	assert.Equal(t, 10, len(levelMap))
+}
 
+func Test_GetLogLevelString(t *testing.T) {
 	name := GetLogLevelString(LogInfo)
-	if name != "INFO" {
-		t.Errorf("expected INFO but got %s", name)
-	}
+	assert.Equal(t, "INFO", name)
+
+	// bad log level
+	name = GetLogLevelString(LogLevel(666))
+	assert.Equal(t, "", name)
+}
+
+func Test_ShouldRegisterLogLevels(t *testing.T) {
 
 	RegisterLogLevel(LogInfo, "HEY")
 	if levelMap[LogInfo] != "HEY" {
 		t.Errorf("expected HEY but got %s", levelMap[LogInfo])
 	}
 
-	name = GetLogLevelString(LogInfo)
+	name := GetLogLevelString(LogInfo)
 	if name != "HEY" {
 		t.Errorf("expected HEY but got %s", name)
 	}

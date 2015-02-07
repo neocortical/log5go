@@ -7,24 +7,30 @@ type LogLevel uint16
 // Standard log levels. Map to intergers separated by 100 to allow for custom
 // log levels to be intermingled with standard ones.
 const (
-	LogAll   LogLevel = iota * 100 // Log all messages, regardless of level
-	LogTrace                       // TRACE log leve/threshold
-	LogDebug                       // DEBUG log leve/threshold
-	LogInfo                        // INFO log leve/threshold
-	LogWarn                        // WARN log leve/threshold
-	LogError                       // ERROR log leve/threshold
-	LogFatal                       // FATAL log leve/threshold
+	LogAll      LogLevel = 0   // Log all messages, regardless of level
+	LogTrace    LogLevel = 100 // TRACE log leve/threshold
+	LogDebug    LogLevel = 200 // DEBUG log leve/threshold
+	LogInfo     LogLevel = 300 // INFO log leve/threshold
+	LogNotice   LogLevel = 350 // NOTICE log leve/threshold
+	LogWarn     LogLevel = 400 // WARN log leve/threshold
+	LogError    LogLevel = 500 // ERROR log leve/threshold
+	LogCritical LogLevel = 530 // CRITICAL log leve/threshold
+	LogAlert    LogLevel = 560 // ALERT log leve/threshold
+	LogFatal    LogLevel = 600 // FATAL/EMERG log leve/threshold
 )
 
 // maps log levels to prefix strings describing each. extensible
 var levelMap = map[LogLevel]string{
-	LogAll:   "LOG",
-	LogTrace: "TRACE",
-	LogDebug: "DEBUG",
-	LogInfo:  "INFO",
-	LogWarn:  "WARN",
-	LogError: "ERROR",
-	LogFatal: "FATAL",
+	LogAll:      "LOG",
+	LogTrace:    "TRACE",
+	LogDebug:    "DEBUG",
+	LogInfo:     "INFO",
+	LogNotice:   "NOTICE",
+	LogWarn:     "WARN",
+	LogError:    "ERROR",
+	LogCritical: "CRIT",
+	LogAlert:    "ALERT",
+	LogFatal:    "FATAL",
 }
 
 // Protects levelMap
