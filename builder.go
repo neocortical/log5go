@@ -23,9 +23,6 @@ func Logger(level LogLevel) Log5Go {
 }
 
 func (l *logger) Clone() Log5Go {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-
 	return &logger{
 		level:      l.level,
 		formatter:  l.formatter,
@@ -38,8 +35,6 @@ func (l *logger) Clone() Log5Go {
 
 // Add a custom format to the logger
 func (l *logger) WithTimeFmt(format string) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.timeFormat = format
 	l.formatter.SetTimeFormat(format)
 	return l
@@ -48,8 +43,6 @@ func (l *logger) WithTimeFmt(format string) Log5Go {
 // Select the console appender set to stdout. You must select an appender only once.
 // You must select an appender prior to configuring it.
 func (l *logger) ToStdout() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.appender = &writerAppender{dest: os.Stdout, errDest: nil}
 	return l
 }
@@ -57,8 +50,6 @@ func (l *logger) ToStdout() Log5Go {
 // Select the console appender set to stderr. You must select an appender only once.
 // You must select an appender prior to configuring it.
 func (l *logger) ToStderr() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.appender = &writerAppender{dest: os.Stderr, errDest: nil}
 	return l
 }
@@ -67,31 +58,23 @@ func (l *logger) ToStderr() Log5Go {
 // You must select an appender only once.
 // You must select an appender prior to configuring it.
 func (l *logger) ToWriter(out io.Writer) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.appender = &writerAppender{dest: out, errDest: nil}
 	return l
 }
 
 func (l *logger) WithPrefix(prefix string) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.prefix = prefix
 	l.updateFormatterIfNecessary()
 	return l
 }
 
 func (l *logger) WithLongLines() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.lines = LogLinesLong
 	l.updateFormatterIfNecessary()
 	return l
 }
 
 func (l *logger) WithShortLines() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.lines = LogLinesShort
 	l.updateFormatterIfNecessary()
 	return l
@@ -100,8 +83,6 @@ func (l *logger) WithShortLines() Log5Go {
 // Select the file appender. You must select an appender only once.
 // You must select an appender prior to configuring it.
 func (l *logger) ToFile(directory string, filename string) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	expandedDir, err := filepath.Abs(directory)
 	if err != nil {
 		// would be nice to do *something* on error, but not sure what
@@ -142,8 +123,6 @@ func (l *logger) ToFile(directory string, filename string) Log5Go {
 // ToAppender sets a custom (i.e third-party) appender as the destination for this logger.
 // No other appender setting methods must be called before or after.
 func (l *logger) ToAppender(appender Appender) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.appender = appender
 	return l
 }
@@ -152,11 +131,9 @@ func (l *logger) ToAppender(appender Appender) Log5Go {
 // to the local syslogd daemon. If this fails, stderr is used instead and an error message
 // is immediately logged.
 func (l *logger) ToLocalSyslog(facility SyslogPriority, tag string) Log5Go {
-	l.lock.Lock()
 
 	if facility < SyslogKernel || facility > SyslogLocal7 {
 		l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
-		l.lock.Unlock()
 		l.Error("INVALID SYSLOG FACILITY: %d", facility)
 
 		return l
@@ -172,14 +149,12 @@ func (l *logger) ToLocalSyslog(facility SyslogPriority, tag string) Log5Go {
 			} else {
 				l.appender = &syslogAppender{conn: conn, facility: facility, tag: tag}
 				l.formatter = newSyslogFormatter(l.lines != 0)
-				l.lock.Unlock()
 				return l
 			}
 		}
 	}
 
 	l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
-	l.lock.Unlock()
 	l.Error("UNABLE TO CONNECT TO LOCAL SYSLOG PROCESS: %v", err)
 
 	return l
@@ -189,11 +164,9 @@ func (l *logger) ToLocalSyslog(facility SyslogPriority, tag string) Log5Go {
 // to the remote syslogd daemon. If this fails, stderr is used instead and an error message
 // is immediately logged.
 func (l *logger) ToRemoteSyslog(facility SyslogPriority, tag string, transport string, addr string) Log5Go {
-	l.lock.Lock()
 
 	if facility < SyslogKernel || facility > SyslogLocal7 {
 		l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
-		l.lock.Unlock()
 		l.Error("INVALID SYSLOG FACILITY: %d", facility)
 
 		return l
@@ -208,12 +181,10 @@ func (l *logger) ToRemoteSyslog(facility SyslogPriority, tag string, transport s
 	if err == nil {
 		l.appender = &syslogAppender{conn: conn, facility: facility, tag: tag}
 		l.formatter = newSyslogFormatter(l.lines != 0)
-		l.lock.Unlock()
 		return l
 	}
 
 	l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
-	l.lock.Unlock()
 	l.Error("UNABLE TO CONNECT TO REMOTE SYSLOG PROCESS: %v", err)
 
 	return l
@@ -222,9 +193,6 @@ func (l *logger) ToRemoteSyslog(facility SyslogPriority, tag string, transport s
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
 func (l *logger) WithRotation(frequency rollFrequency, keepNLogs int) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
 	a, isFileAppender := l.appender.(*fileAppender)
 	if !isFileAppender {
 		return l
@@ -240,9 +208,6 @@ func (l *logger) WithRotation(frequency rollFrequency, keepNLogs int) Log5Go {
 // Send WARN, ERROR, and FATAL messages to stderr. ToConsole() must have been
 // called already.
 func (l *logger) WithStderr() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
 	a, iswriterAppender := l.appender.(*writerAppender)
 	if !iswriterAppender {
 		return l
@@ -253,8 +218,6 @@ func (l *logger) WithStderr() Log5Go {
 }
 
 func (l *logger) WithFmt(format string) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	stringFormatter := NewStringFormatter(format)
 	stringFormatter.explicitFormat = true
 	l.formatter = stringFormatter

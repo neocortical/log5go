@@ -75,14 +75,6 @@ func assertMatch(t *testing.T, expected string, buf *bytes.Buffer) {
 	matched, err := regexp.MatchString(expected, buf.String())
 	assert.Nil(t, err, "regexp error matching output: %v", err)
 	assert.True(t, matched, "expected \n%s\nbut got\n%s\n", expected, buf.String())
-
-	out := buf.String()
-	if strings.Contains(out, "samurai") {
-		for strings.HasSuffix(out, "\n") {
-			fmt.Printf("nerp!")
-			out = out[:len(out)-1]
-		}
-	}
 }
 
 func subLevel(expected, level string) string {

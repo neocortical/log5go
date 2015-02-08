@@ -11,7 +11,7 @@ import (
 
 // Inner type of all loggers
 type logger struct {
-	lock       sync.RWMutex
+	sync.RWMutex
 	level      LogLevel
 	formatter  Formatter
 	appender   Appender
@@ -77,14 +77,10 @@ func (l *logger) SetLogLevel(level LogLevel) {
 }
 
 func (l *logger) WithData(d Data) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	return &boundLogger{l: l, data: d}
 }
 
 func (l *logger) Json() Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	l.formatter = &jsonFormatter{}
 	l.formatter.SetTimeFormat(l.timeFormat)
 	l.formatter.SetLines(l.lines != 0)
@@ -99,23 +95,18 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	var file string
 	var line int
 
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
 	if level < l.level {
 		return errLowLevel
 	}
 
 	if l.lines != LogLinesNone {
 		// release lock while getting caller info - it's expensive.
-		l.lock.Unlock()
 		var ok bool
 		_, file, line, ok = runtime.Caller(calldepth)
 		if !ok {
 			file = "???"
 			line = 0
 		}
-		l.lock.Lock()
 
 		if l.lines == LogLinesShort {
 			short := file
@@ -130,6 +121,10 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 	}
 
 	data = scrubData(data)
+
+	// lock buffer
+	l.Lock()
+	defer l.Unlock()
 
 	l.buf = l.buf[:0]
 	l.formatter.Format(now, level, l.prefix, file, uint(line), msg, data, &l.buf)
