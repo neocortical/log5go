@@ -3,7 +3,6 @@ package log5go
 import (
 	"fmt"
 	"io"
-	"sync"
 	"time"
 )
 
@@ -21,15 +20,12 @@ type Data map[string]interface{}
 // a NOOP to keep developers from doing silly things.
 type boundLogger struct {
 	l    *logger
-	lock sync.RWMutex // protects data
 	data Data
 }
 
 //-- Log5GoData interface ------------
 
 func (l *boundLogger) WithData(d Data) Log5Go {
-	l.lock.Lock()
-	defer l.lock.Unlock()
 	for key, value := range d {
 		l.data[key] = value
 	}
@@ -39,44 +35,30 @@ func (l *boundLogger) WithData(d Data) Log5Go {
 //-- Log5Go interface ------------
 
 func (l *boundLogger) Log(level LogLevel, format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), level, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Trace(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogTrace, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Debug(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogDebug, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Info(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Warn(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogWarn, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Error(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogError, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Fatal(format string, a ...interface{}) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 	l.l.log(time.Now(), LogFatal, 2, fmt.Sprintf(format, a...), l.data)
 }
 
