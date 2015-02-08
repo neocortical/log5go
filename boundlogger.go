@@ -164,3 +164,13 @@ func (l *boundLogger) Register(key string) Log5Go {
 	// NOOP
 	return l
 }
+
+func (l *boundLogger) ToLocalSyslog(facility SyslogPriority, tag string) Log5Go {
+	// NOOP
+	return l
+}
+
+func (l *boundLogger) ToRemoteSyslog(facility SyslogPriority, tag string, transport string, addr string) Log5Go {
+	// NOOP
+	return l
+}

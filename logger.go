@@ -85,7 +85,9 @@ func (l *logger) WithData(d Data) Log5Go {
 func (l *logger) Json() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.formatter = defaultJsonFormatter
+	l.formatter = &jsonFormatter{}
+	l.formatter.SetTimeFormat(l.timeFormat)
+	l.formatter.SetLines(l.lines != 0)
 	return l
 }
 
@@ -127,54 +129,12 @@ func (l *logger) log(t time.Time, level LogLevel, calldepth int, msg string, dat
 		}
 	}
 
-	// gather data
-	timeString := ""
-	if l.timeFormat != "" {
-		timeString = now.Format(l.timeFormat) // TODO: optimize for speed/memory
-	}
-	levelString := GetLogLevelString(level)
-
 	data = scrubData(data)
 
 	l.buf = l.buf[:0]
-	if l.formatter == nil {
-		l.getDefaultFormat().Format(timeString, levelString, l.prefix, file, uint(line), msg, data, &l.buf)
-	} else {
-		l.formatter.Format(timeString, levelString, l.prefix, file, uint(line), msg, data, &l.buf)
-	}
+	l.formatter.Format(now, level, l.prefix, file, uint(line), msg, data, &l.buf)
 
 	return l.appender.Append(&l.buf, level, now)
-}
-
-// getDefaultFormat method inspects the logger and applies the appropriate default
-// format for the current config. logger should be locked by the caller so that
-// config remains unchained when the data is rendered for the returned format.
-func (l *logger) getDefaultFormat() Formatter {
-	if l.timeFormat == "" {
-		if l.lines != 0 {
-			if l.prefix != "" {
-				return fmtTimePrefixLines
-			} else {
-				return fmtNotimeLines
-			}
-		} else if l.prefix != "" {
-			return fmtNotimePrefix
-		} else {
-			return fmtNone
-		}
-	} else {
-		if l.lines != 0 {
-			if l.prefix != "" {
-				return fmtTimePrefixLines
-			} else {
-				return fmtTimeLines
-			}
-		} else if l.prefix != "" {
-			return fmtTimePrefix
-		} else {
-			return fmtTime
-		}
-	}
 }
 
 // scrubData scrubs map of any non-basic elements

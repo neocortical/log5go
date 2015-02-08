@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"time"
 	"unicode/utf8"
 )
 
@@ -21,11 +22,20 @@ import (
 // Single occurrences of % will be discarded. Be sure to include %m somewhere or
 // your message won't get logged!
 type StringFormatter struct {
-	parts []string
+	parts          []string
+	explicitFormat bool
+	timeFormat     string
 }
 
 func NewStringFormatter(pattern string) (sf *StringFormatter) {
-	sf = new(StringFormatter)
+	sf = &StringFormatter{timeFormat: TF_GoStd}
+
+	sf.parts = decodePattern(pattern)
+
+	return sf
+}
+
+func decodePattern(pattern string) (result []string) {
 	var buf []byte
 	r := make([]byte, 4)
 	for len(pattern) > 0 {
@@ -45,11 +55,11 @@ func NewStringFormatter(pattern string) (sf *StringFormatter) {
 				// valid meta-pattern detected. dump any collected literal pattern first
 				// dump any literal value we have collected
 				if len(buf) > 0 {
-					sf.parts = append(sf.parts, string(buf))
+					result = append(result, string(buf))
 					buf = buf[:0]
 				}
 
-				sf.parts = append(sf.parts, "%"+string(meta&0xff)) // all metas are ascii
+				result = append(result, "%"+string(meta&0xff)) // all metas are ascii
 				pattern = pattern[width:]
 			}
 		} else {
@@ -59,18 +69,20 @@ func NewStringFormatter(pattern string) (sf *StringFormatter) {
 	}
 
 	if len(buf) > 0 {
-		sf.parts = append(sf.parts, string(buf))
+		result = append(result, string(buf))
 	}
 
-	return sf
+	return result
 }
 
-func (f *StringFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, buf *[]byte) {
+func (f *StringFormatter) Format(tstamp time.Time, level LogLevel, prefix, caller string, line uint, msg string, data Data, buf *[]byte) {
 	for _, part := range f.parts {
 		switch part {
 		case "%t":
+			timeString := tstamp.Format(f.timeFormat)
 			*buf = append(*buf, timeString...)
 		case "%l":
+			levelString := GetLogLevelString(level)
 			*buf = append(*buf, levelString...)
 		case "%p":
 			*buf = append(*buf, prefix...)
@@ -89,6 +101,14 @@ func (f *StringFormatter) Format(timeString, levelString, prefix, caller string,
 			*buf = append(*buf, part...)
 		}
 	}
+}
+
+func (f *StringFormatter) SetTimeFormat(timeFormat string) {
+	f.timeFormat = timeFormat
+}
+
+func (f *StringFormatter) SetLines(lines bool) {
+	// NOOP
 }
 
 func appendData(msg string, data Data) string {

@@ -37,6 +37,9 @@ type Log5Go interface {
 	// LogBuilder contains methods for creating new logs using a builder pattern. See the LogBuilder interface for details.
 	LogBuilder
 
+	// SyslogBuilder contains methods for creating syslog loggers using a builder pattern.
+	SyslogBuilder
+
 	// Log5GoData contains methods for appending structured data to log messages. See interface description for details.
 	Log5GoData
 }
@@ -100,6 +103,15 @@ type LogBuilder interface {
 
 	// Register registers a logger in the log5go registry, allowing it to be retrieved from anywhere in your program
 	Register(key string) Log5Go
+}
+
+// SyslogBuilder contains methods for building syslog loggers
+type SyslogBuilder interface {
+	// ToLocalSyslog creates a logger that appends to the local syslogd process
+	ToLocalSyslog(facility SyslogPriority, tag string) Log5Go
+
+	// ToRemoteSyslog creates a logger that appends to a remote syslogd process
+	ToRemoteSyslog(facility SyslogPriority, tag string, transport string, addr string) Log5Go
 }
 
 type rollFrequency uint8

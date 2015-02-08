@@ -3,11 +3,13 @@ package log5go
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
-type jsonFormatter struct{}
-
-var defaultJsonFormatter = &jsonFormatter{}
+type jsonFormatter struct {
+	timeFormat string
+	lines      bool
+}
 
 type jsonLog struct {
 	Time   string                 `json:"time"`
@@ -18,12 +20,12 @@ type jsonLog struct {
 	Data   map[string]interface{} `json:"data,omitempty"`
 }
 
-func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, out *[]byte) {
+func (f *jsonFormatter) Format(tstamp time.Time, level LogLevel, prefix, caller string, line uint, msg string, data Data, out *[]byte) {
 	output := jsonLog{
-		Time:   timeString,
-		Level:  levelString,
+		Time:   tstamp.Format(f.timeFormat),
+		Level:  GetLogLevelString(level),
 		Prefix: prefix,
-		Line:   formatLine(caller, line),
+		Line:   f.formatLine(caller, line),
 		Msg:    msg,
 		Data:   data,
 	}
@@ -34,8 +36,16 @@ func (f *jsonFormatter) Format(timeString, levelString, prefix, caller string, l
 	}
 }
 
-func formatLine(caller string, line uint) string {
-	if caller == "" {
+func (f *jsonFormatter) SetTimeFormat(timeFormat string) {
+	f.timeFormat = timeFormat
+}
+
+func (f *jsonFormatter) SetLines(lines bool) {
+	f.lines = lines
+}
+
+func (f *jsonFormatter) formatLine(caller string, line uint) string {
+	if !f.lines || caller == "" {
 		return ""
 	}
 	return fmt.Sprintf("%s:%d", caller, line)

@@ -2,6 +2,7 @@ package log5go
 
 import (
 	"testing"
+	"time"
 )
 
 func TestNewStringFormatter(t *testing.T) {
@@ -25,17 +26,19 @@ func TestNewStringFormatter(t *testing.T) {
 }
 
 func TestStringFormatterParse(t *testing.T) {
+	theTime := time.Unix(1423343766, 0)
+
 	var buf []byte
 	sf := NewStringFormatter("%t %l %p (%c:%n): %m %%艾未未")
-	sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", nil, &buf)
-	expected := "2014 INFO 艾未未 (acme.go:123): hello? %艾未未"
+	sf.Format(theTime, LogInfo, "艾未未", "acme.go", 123, "hello?", nil, &buf)
+	expected := "2015/02/07 13:16:06 INFO 艾未未 (acme.go:123): hello? %艾未未"
 	if expected != string(buf) {
 		t.Errorf("expected %s but got %s", expected, string(buf))
 	}
 
 	buf = buf[:0]
 	sf = NewStringFormatter("")
-	sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", nil, &buf)
+	sf.Format(theTime, LogInfo, "艾未未", "acme.go", 123, "hello?", nil, &buf)
 	expected = ""
 	if expected != string(buf) {
 		t.Errorf("expected %s but got %s", expected, string(buf))
@@ -43,6 +46,7 @@ func TestStringFormatterParse(t *testing.T) {
 }
 
 func TestDataAppend(t *testing.T) {
+	theTime := time.Unix(1423343766, 0)
 	d := Data{
 		"foo": "bar",
 		"baz": 42,
@@ -51,9 +55,9 @@ func TestDataAppend(t *testing.T) {
 	var buf []byte
 
 	sf := NewStringFormatter("%t %l %p: %m")
-	sf.Format("2014", "INFO", "艾未未", "acme.go", 123, "hello?", d, &buf)
-	expected := "2014 INFO 艾未未: hello? foo=\"bar\" baz=42"
-	expected2 := "2014 INFO 艾未未: hello? baz=42 foo=\"bar\""
+	sf.Format(theTime, LogInfo, "艾未未", "acme.go", 123, "hello?", d, &buf)
+	expected := "2015/02/07 13:16:06 INFO 艾未未: hello? foo=\"bar\" baz=42"
+	expected2 := "2015/02/07 13:16:06 INFO 艾未未: hello? baz=42 foo=\"bar\""
 	if expected != string(buf) && expected2 != string(buf) {
 		t.Errorf("expected %s but got %s", expected, string(buf))
 	}

@@ -1,8 +1,12 @@
 package log5go
 
+import "time"
+
 // interface Formatter formats a log message into *out for passing to an Appender
 type Formatter interface {
-	Format(timeString, levelString, prefix, caller string, line uint, msg string, data Data, out *[]byte)
+	Format(tstamp time.Time, level LogLevel, prefix, caller string, line uint, msg string, data Data, out *[]byte)
+	SetTimeFormat(timeFormat string)
+	SetLines(lines bool)
 }
 
 // Some constant string formats for convenience, also used internally
@@ -16,14 +20,3 @@ const (
 	FMT_NoTimeLines        = "%l (%c:%n): %m"
 	FMT_NoTimePrefixLines  = "%l %p (%c:%n): %m"
 )
-
-// defaults, use dependent on logger settings
-var fmtNone = NewStringFormatter(FMT_NoTime)
-var fmtTime = NewStringFormatter(FMT_Default)
-var fmtTimePrefix = NewStringFormatter(FMT_DefaultPrefix)
-var fmtTimeLines = NewStringFormatter(FMT_DefaultLines)
-var fmtTimePrefixLines = NewStringFormatter(FMT_DefaultPrefixLines)
-
-var fmtNotimePrefix = NewStringFormatter(FMT_NoTimePrefix)
-var fmtNotimeLines = NewStringFormatter(FMT_NoTimeLines)
-var fmtNotimePrefixLines = NewStringFormatter(FMT_NoTimePrefixLines)

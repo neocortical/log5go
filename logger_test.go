@@ -8,18 +8,18 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type loggerTest struct {
-	testname   string
-	msg        string
-	args       []interface{}
-	data       Data
-	timeFormat string
-	prefix     string
-	formatter  Formatter
-	expected   string
+	msg      string
+	args     []interface{}
+	expected string
+	create   loggerFunc
 }
+
+type loggerFunc func() Log5Go
 
 const (
 	Rxdate                  = `[0-9]{4}/[0-9]{2}/[0-9]{2}`
@@ -37,95 +37,52 @@ const (
 	Rxdata                  = `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
 )
 
-var loggerTests = []loggerTest{
-	{"basic", "hello", []interface{}{}, Data{}, "2006", "noshow", NewStringFormatter("%t %l %m"), "^[0-9]{4} {{level}} hello\n$"},
-	{"stdwithutf8", "侍 (%s)", []interface{}{"samurai"}, Data{}, TF_GoStd, "prefix", nil, "^" + Rxdate + " " + Rxtime + " {{level}} prefix: 侍 \\(samurai\\)\n$"},
+var loggerTest2Tests = []loggerTest{
+	{
+		msg:      "hello",
+		expected: "^" + Rxdate + " " + Rxtime + " {{level}} : hello\n$",
+		create:   func() Log5Go { return Logger(LogAll) },
+	},
+	{
+		msg:      "侍 (%s)",
+		args:     []interface{}{"samurai"},
+		expected: "^" + Rxdate + " " + Rxtime + " {{level}} : 侍 \\(samurai\\)\n$",
+		create:   func() Log5Go { return Logger(LogAll) },
+	},
 }
 
-func TestAllLoggerLevels(t *testing.T) {
+func Test_RunLoggerTests(t *testing.T) {
 	var buf bytes.Buffer
 	appender := &writerAppender{dest: &buf}
 
-	for _, test := range loggerTests {
-		l := &logger{
-			level:      LogAll,
-			formatter:  test.formatter,
-			appender:   appender,
-			timeFormat: test.timeFormat,
-			prefix:     test.prefix,
+	for _, test := range loggerTest2Tests {
+		l := test.create()
+		l = l.ToAppender(appender)
+
+		if test.args != nil {
+			l.Info(test.msg, test.args...)
+		} else {
+			l.Info(test.msg)
 		}
-		runLoggerLevelTest(l, &buf, &test, t)
+		expected := subLevel(test.expected, "INFO")
+		assertMatch(t, expected, &buf)
+
+		buf.Reset()
 	}
 }
 
-func runLoggerLevelTest(l Log5Go, buf *bytes.Buffer, test *loggerTest, t *testing.T) {
-
-	var LLCustom LogLevel = LogInfo + 1
-	RegisterLogLevel(LLCustom, "CUSTOM")
-
-	l.SetLogLevel(LogTrace)
-	l.Trace(test.msg, test.args...)
-	expected := subLevel(test.expected, "TRACE")
-	assertMatch(test.testname, "trace", expected, buf, t)
-	l.SetLogLevel(LogTrace + 1)
-	l.Trace(test.msg, test.args...)
-	assertMatch(test.testname, "tracethresh", "", buf, t)
-
-	l.SetLogLevel(LogDebug)
-	l.Debug(test.msg, test.args...)
-	expected = subLevel(test.expected, "DEBUG")
-	assertMatch(test.testname, "debug", expected, buf, t)
-	l.SetLogLevel(LogDebug + 1)
-	l.Debug(test.msg, test.args...)
-	assertMatch(test.testname, "debugthresh", "", buf, t)
-
-	l.SetLogLevel(LogAll)
-	l.Info(test.msg, test.args...)
-	expected = subLevel(test.expected, "INFO")
-	assertMatch(test.testname, "info", expected, buf, t)
-	l.SetLogLevel(LogInfo + 1)
-	l.Info(test.msg, test.args...)
-	assertMatch(test.testname, "infothresh", "", buf, t)
-
-	l.Warn(test.msg, test.args...)
-	expected = subLevel(test.expected, "WARN")
-	assertMatch(test.testname, "warn", expected, buf, t)
-	l.SetLogLevel(LogWarn + 1)
-	l.Warn(test.msg, test.args...)
-	assertMatch(test.testname, "warnthresh", "", buf, t)
-
-	l.Error(test.msg, test.args...)
-	expected = subLevel(test.expected, "ERROR")
-	assertMatch(test.testname, "error", expected, buf, t)
-	l.SetLogLevel(LogError + 1)
-	l.Error(test.msg, test.args...)
-	assertMatch(test.testname, "errorthresh", "", buf, t)
-
-	l.Fatal(test.msg, test.args...)
-	expected = subLevel(test.expected, "FATAL")
-	assertMatch(test.testname, "fatal", expected, buf, t)
-	l.SetLogLevel(LogFatal + 1)
-	l.Fatal(test.msg, test.args...)
-	assertMatch(test.testname, "fatalthresh", "", buf, t)
-
-	l.SetLogLevel(LLCustom)
-	l.Log(LLCustom, test.msg, test.args...)
-	expected = subLevel(test.expected, "CUSTOM")
-	assertMatch(test.testname, "custom", expected, buf, t)
-	l.SetLogLevel(LogWarn)
-	l.Log(LLCustom, test.msg, test.args...)
-	assertMatch(test.testname, "customthresh", "", buf, t)
-
-	// cleanup
-	DeregisterLogLevel(LLCustom)
-}
-
-func assertMatch(testname string, testpart, expected string, buf *bytes.Buffer, t *testing.T) {
+func assertMatch(t *testing.T, expected string, buf *bytes.Buffer) {
 	matched, err := regexp.MatchString(expected, buf.String())
-	if err != nil || !matched {
-		t.Errorf("test %s/%s expected \n%s but got \n%s", testname, testpart, expected, buf.String())
+	assert.Nil(t, err, "regexp error matching output: %v", err)
+	assert.True(t, matched, "expected \n%s\nbut got\n%s\n", expected, buf.String())
+
+	out := buf.String()
+	if strings.Contains(out, "samurai") {
+		for strings.HasSuffix(out, "\n") {
+			fmt.Printf("nerp!")
+			out = out[:len(out)-1]
+		}
 	}
-	buf.Reset()
 }
 
 func subLevel(expected, level string) string {
@@ -134,7 +91,7 @@ func subLevel(expected, level string) string {
 
 func TestOutputOfMultipleLines(t *testing.T) {
 	year := time.Now().Year()
-	l := getTestLogger(LogAll)
+	l := Logger(LogAll).WithTimeFmt("2006").ToAppender(&bufferAppender{bytes.Buffer{}}).(*logger)
 	l.Trace("foo: %d", 1)
 	l.Debug("bar: %d", 2)
 	l.Info("baz: %d", 3)
@@ -142,7 +99,7 @@ func TestOutputOfMultipleLines(t *testing.T) {
 	l.Error("quux: %d", 5)
 	l.Fatal("corge: %d", 6)
 
-	a, _ := l.appender.(*bufferAppender)
+	a := l.appender.(*bufferAppender)
 	expected := fmt.Sprintf("%d TRACE : foo: 1\n%d DEBUG : bar: 2\n%d INFO : baz: 3\n%d WARN : qux: 4\n%d ERROR : quux: 5\n%d FATAL : corge: 6\n", year, year, year, year, year, year)
 	if a.buf.String() != expected {
 		t.Errorf("unexpected log output. expected \n%s\n ...but got \n%s", expected, a.buf.String())
@@ -201,14 +158,6 @@ func runTest(log Log5Go, buf *bytes.Buffer, fmt string, t *testing.T) {
 	matched, err := regexp.MatchString(fmt, buf.String())
 	if err != nil || !matched {
 		t.Errorf("expected \n%s but got \n%s", fmt, buf.String())
-	}
-}
-
-func getTestLogger(level LogLevel) *logger {
-	return &logger{
-		level:      level,
-		appender:   &bufferAppender{bytes.Buffer{}},
-		timeFormat: "2006", // simple
 	}
 }
 

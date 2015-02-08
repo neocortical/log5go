@@ -1,7 +1,9 @@
 package log5go
 
 import (
+	"fmt"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"time"
@@ -11,7 +13,7 @@ import (
 func Logger(level LogLevel) Log5Go {
 	logger := logger{
 		level:      level,
-		formatter:  nil,
+		formatter:  NewStringFormatter(FMT_Default),
 		appender:   &writerAppender{dest: os.Stderr, errDest: nil},
 		timeFormat: TF_GoStd,
 		prefix:     "",
@@ -39,6 +41,7 @@ func (l *logger) WithTimeFmt(format string) Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	l.timeFormat = format
+	l.formatter.SetTimeFormat(format)
 	return l
 }
 
@@ -74,6 +77,7 @@ func (l *logger) WithPrefix(prefix string) Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	l.prefix = prefix
+	l.updateFormatterIfNecessary()
 	return l
 }
 
@@ -81,6 +85,7 @@ func (l *logger) WithLongLines() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	l.lines = LogLinesLong
+	l.updateFormatterIfNecessary()
 	return l
 }
 
@@ -88,6 +93,7 @@ func (l *logger) WithShortLines() Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	l.lines = LogLinesShort
+	l.updateFormatterIfNecessary()
 	return l
 }
 
@@ -142,6 +148,77 @@ func (l *logger) ToAppender(appender Appender) Log5Go {
 	return l
 }
 
+// ToLocalSyslog sets a syslog formatter and attempts to set a syslog appender connected
+// to the local syslogd daemon. If this fails, stderr is used instead and an error message
+// is immediately logged.
+func (l *logger) ToLocalSyslog(facility SyslogPriority, tag string) Log5Go {
+	l.lock.Lock()
+
+	if facility < SyslogKernel || facility > SyslogLocal7 {
+		l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
+		l.lock.Unlock()
+		l.Error("INVALID SYSLOG FACILITY: %d", facility)
+
+		return l
+	}
+
+	var conn net.Conn
+	var err error
+	for _, transport := range socketTypes {
+		for _, socket := range socketLocations {
+			conn, err = net.DialTimeout(transport, socket, time.Second*10)
+			if err != nil {
+				continue
+			} else {
+				l.appender = &syslogAppender{conn: conn, facility: facility, tag: tag}
+				l.formatter = newSyslogFormatter(l.lines != 0)
+				l.lock.Unlock()
+				return l
+			}
+		}
+	}
+
+	l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
+	l.lock.Unlock()
+	l.Error("UNABLE TO CONNECT TO LOCAL SYSLOG PROCESS: %v", err)
+
+	return l
+}
+
+// ToRemoteSyslog sets a syslog formatter and attempts to set a syslog appender connected
+// to the remote syslogd daemon. If this fails, stderr is used instead and an error message
+// is immediately logged.
+func (l *logger) ToRemoteSyslog(facility SyslogPriority, tag string, transport string, addr string) Log5Go {
+	l.lock.Lock()
+
+	if facility < SyslogKernel || facility > SyslogLocal7 {
+		l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
+		l.lock.Unlock()
+		l.Error("INVALID SYSLOG FACILITY: %d", facility)
+
+		return l
+	}
+
+	var conn net.Conn
+	var err error
+	fmt.Printf("dialing %s (%s).\n", addr, transport)
+
+	conn, err = net.DialTimeout(transport, addr, time.Second*10)
+	fmt.Printf("finished dialing. error: %v\n", err)
+	if err == nil {
+		l.appender = &syslogAppender{conn: conn, facility: facility, tag: tag}
+		l.formatter = newSyslogFormatter(l.lines != 0)
+		l.lock.Unlock()
+		return l
+	}
+
+	l.appender = &writerAppender{dest: os.Stderr, errDest: os.Stderr}
+	l.lock.Unlock()
+	l.Error("UNABLE TO CONNECT TO REMOTE SYSLOG PROCESS: %v", err)
+
+	return l
+}
+
 // Add file rotation configuration to the file appender. ToFile() must have been
 // called already.
 func (l *logger) WithRotation(frequency rollFrequency, keepNLogs int) Log5Go {
@@ -178,7 +255,11 @@ func (l *logger) WithStderr() Log5Go {
 func (l *logger) WithFmt(format string) Log5Go {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.formatter = NewStringFormatter(format)
+	stringFormatter := NewStringFormatter(format)
+	stringFormatter.explicitFormat = true
+	l.formatter = stringFormatter
+	l.formatter.SetTimeFormat(l.timeFormat)
+	l.formatter.SetLines(l.lines != 0)
 	return l
 }
 
@@ -187,4 +268,46 @@ func (l *logger) WithFmt(format string) Log5Go {
 func (l *logger) Register(key string) Log5Go {
 	loggerRegistry.Put(key, l)
 	return l
+}
+
+// getDefaultFormat method inspects the logger and applies the appropriate default
+// format for the current config. logger should be locked by the caller so that
+// config remains unchained when the data is rendered for the returned format.
+func (l *logger) updateFormatterIfNecessary() {
+	stringFormatter, ok := l.formatter.(*StringFormatter)
+	if ok && !stringFormatter.explicitFormat {
+		pattern := getFormatForSettings(l.prefix, l.timeFormat, l.lines != 0)
+		stringFormatter.parts = decodePattern(pattern)
+	}
+
+	l.formatter.SetTimeFormat(l.timeFormat)
+	l.formatter.SetLines(l.lines != 0)
+}
+
+func getFormatForSettings(prefix, timeFormat string, lines bool) string {
+	if timeFormat == "" {
+		if lines {
+			if prefix != "" {
+				return FMT_DefaultPrefixLines
+			} else {
+				return FMT_NoTimeLines
+			}
+		} else if prefix != "" {
+			return FMT_NoTimePrefix
+		} else {
+			return FMT_NoTime
+		}
+	} else {
+		if lines {
+			if prefix != "" {
+				return FMT_DefaultPrefixLines
+			} else {
+				return FMT_DefaultLines
+			}
+		} else if prefix != "" {
+			return FMT_DefaultPrefix
+		} else {
+			return FMT_Default
+		}
+	}
 }
