@@ -56,8 +56,8 @@ func TestDataAppend(t *testing.T) {
 
 	sf := NewStringFormatter("%t %l %p: %m")
 	sf.Format(theTime, LogInfo, "艾未未", "acme.go", 123, "hello?", d, &buf)
-	expected := "2015/02/07 13:16:06 INFO 艾未未: hello? foo=\"bar\" baz=42"
-	expected2 := "2015/02/07 13:16:06 INFO 艾未未: hello? baz=42 foo=\"bar\""
+	expected := theTime.Format(TF_GoStd) + " INFO 艾未未: hello? foo=\"bar\" baz=42"
+	expected2 := theTime.Format(TF_GoStd) + " INFO 艾未未: hello? baz=42 foo=\"bar\""
 	if expected != string(buf) && expected2 != string(buf) {
 		t.Errorf("expected %s but got %s", expected, string(buf))
 	}
