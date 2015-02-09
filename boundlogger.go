@@ -50,12 +50,24 @@ func (l *boundLogger) Info(format string, a ...interface{}) {
 	l.l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, a...), l.data)
 }
 
+func (l *boundLogger) Notice(format string, a ...interface{}) {
+	l.l.log(time.Now(), LogNotice, 2, fmt.Sprintf(format, a...), l.data)
+}
+
 func (l *boundLogger) Warn(format string, a ...interface{}) {
 	l.l.log(time.Now(), LogWarn, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Error(format string, a ...interface{}) {
 	l.l.log(time.Now(), LogError, 2, fmt.Sprintf(format, a...), l.data)
+}
+
+func (l *boundLogger) Critical(format string, a ...interface{}) {
+	l.l.log(time.Now(), LogCritical, 2, fmt.Sprintf(format, a...), l.data)
+}
+
+func (l *boundLogger) Alert(format string, a ...interface{}) {
+	l.l.log(time.Now(), LogAlert, 2, fmt.Sprintf(format, a...), l.data)
 }
 
 func (l *boundLogger) Fatal(format string, a ...interface{}) {

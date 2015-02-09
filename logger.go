@@ -56,12 +56,24 @@ func (l *logger) Info(format string, a ...interface{}) {
 	l.log(time.Now(), LogInfo, 2, fmt.Sprintf(format, a...), nil)
 }
 
+func (l *logger) Notice(format string, a ...interface{}) {
+	l.log(time.Now(), LogNotice, 2, fmt.Sprintf(format, a...), nil)
+}
+
 func (l *logger) Warn(format string, a ...interface{}) {
 	l.log(time.Now(), LogWarn, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Error(format string, a ...interface{}) {
 	l.log(time.Now(), LogError, 2, fmt.Sprintf(format, a...), nil)
+}
+
+func (l *logger) Critical(format string, a ...interface{}) {
+	l.log(time.Now(), LogCritical, 2, fmt.Sprintf(format, a...), nil)
+}
+
+func (l *logger) Alert(format string, a ...interface{}) {
+	l.log(time.Now(), LogAlert, 2, fmt.Sprintf(format, a...), nil)
 }
 
 func (l *logger) Fatal(format string, a ...interface{}) {

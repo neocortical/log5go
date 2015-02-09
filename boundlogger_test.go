@@ -36,41 +36,6 @@ func TestWithData(t *testing.T) {
 	}
 }
 
-// func TestAllBoundLoggerLevels(t *testing.T) {
-// 	var buf bytes.Buffer
-// 	appender := &writerAppender{dest: &buf}
-//
-// 	for _, test := range loggerTests {
-// 		l := Logger(LogAll).ToAppender(appender).WithPrefix(test.prefix)
-// 		if test.timeFormat != "" {
-// 			l = l.WithTimeFmt(test.timeFormat)
-// 		}
-// 		if test.format != "" {
-// 			l = l.WithFmt(test.format)
-// 		}
-// 		bl := &boundLogger{
-// 			l:    l.(*logger),
-// 			data: test.data,
-// 		}
-// 		runLoggerLevelTest(bl, &buf, &test, t)
-// 	}
-//
-// 	for _, test := range boundLoggerTests {
-// 		l := Logger(LogAll).ToAppender(appender).WithPrefix(test.prefix)
-// 		if test.timeFormat != "" {
-// 			l = l.WithTimeFmt(test.timeFormat)
-// 		}
-// 		if test.format != "" {
-// 			l = l.WithFmt(test.format)
-// 		}
-// 		bl := &boundLogger{
-// 			l:    l.(*logger),
-// 			data: test.data,
-// 		}
-// 		runLoggerLevelTest(bl, &buf, &test, t)
-// 	}
-// }
-
 func TestBoundLoggerBuilderNoops(t *testing.T) {
 	var buf bytes.Buffer
 	appender := &writerAppender{dest: &buf}
@@ -151,6 +116,26 @@ func TestBoundLoggerBuilderNoops(t *testing.T) {
 	}
 
 	bl2 = bl.Json()
+	if bl2 != bl || l.appender != appender {
+		t.Error("appender changed")
+	}
+
+	bl.SetLogLevel(LogError)
+	if l.level != LogAll {
+		t.Error("log level changed")
+	}
+
+	bl2 = bl.Clone()
+	if bl2 != bl {
+		t.Error("clone changed logger")
+	}
+
+	bl2 = bl.ToLocalSyslog(SyslogLocal2, "foo")
+	if bl2 != bl || l.appender != appender {
+		t.Error("appender changed")
+	}
+
+	bl2 = bl.ToRemoteSyslog(SyslogLocal2, "foo", "udp", "localhost:514")
 	if bl2 != bl || l.appender != appender {
 		t.Error("appender changed")
 	}

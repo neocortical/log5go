@@ -30,7 +30,7 @@ var levelMap = map[LogLevel]string{
 	LogError:    "ERROR",
 	LogCritical: "CRIT",
 	LogAlert:    "ALERT",
-	LogFatal:    "FATAL",
+	LogFatal:    "FATAL", // This level is also Syslog/EMERG
 }
 
 // Protects levelMap

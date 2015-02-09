@@ -15,6 +15,7 @@ import (
 type loggerTest struct {
 	msg      string
 	args     []interface{}
+	data     Data
 	expected string
 	create   loggerFunc
 }
@@ -37,7 +38,7 @@ const (
 	Rxdata                  = `(pi=3\.14159265359 foo=\"bar\"|foo=\"bar\" pi=3\.14159265359)`
 )
 
-var loggerTest2Tests = []loggerTest{
+var loggerTests = []loggerTest{
 	{
 		msg:      "hello",
 		expected: "^" + Rxdate + " " + Rxtime + " {{level}} : hello\n$",
@@ -49,26 +50,119 @@ var loggerTest2Tests = []loggerTest{
 		expected: "^" + Rxdate + " " + Rxtime + " {{level}} : 侍 \\(samurai\\)\n$",
 		create:   func() Log5Go { return Logger(LogAll) },
 	},
+	{
+		msg:      "foo",
+		args:     nil,
+		expected: "^" + Rxdate + " " + Rxtime + " {{level}} : foo (foo=\"bar\"|pi=3.14) (foo=\"bar\"|pi=3.14)\n$",
+		data:     Data{"foo": "bar", "pi": 3.14},
+		create:   func() Log5Go { return Logger(LogAll) },
+	},
 }
 
 func Test_RunLoggerTests(t *testing.T) {
 	var buf bytes.Buffer
 	appender := &writerAppender{dest: &buf}
 
-	for _, test := range loggerTest2Tests {
+	for _, test := range loggerTests {
 		l := test.create()
 		l = l.ToAppender(appender)
 
+		if test.data != nil {
+			l = l.WithData(test.data)
+		}
+
+		runLevelTest(t, test, l, LogTrace, &buf)
+		runLevelTest(t, test, l, LogDebug, &buf)
+		runLevelTest(t, test, l, LogInfo, &buf)
+		runLevelTest(t, test, l, LogNotice, &buf)
+		runLevelTest(t, test, l, LogWarn, &buf)
+		runLevelTest(t, test, l, LogError, &buf)
+		runLevelTest(t, test, l, LogCritical, &buf)
+		runLevelTest(t, test, l, LogAlert, &buf)
+		runLevelTest(t, test, l, LogFatal, &buf)
+	}
+}
+
+func runLevelTest(t *testing.T, test loggerTest, l Log5Go, level LogLevel, buf *bytes.Buffer) {
+	var expected string
+
+	if test.args != nil {
+		l.Log(level, test.msg, test.args...)
+	} else {
+		l.Log(level, test.msg)
+	}
+	expected = subLevel(test.expected, GetLogLevelString(level))
+	buf.Reset()
+
+	switch level {
+	case LogTrace:
+		if test.args != nil {
+			l.Trace(test.msg, test.args...)
+		} else {
+			l.Trace(test.msg)
+		}
+		expected = subLevel(test.expected, "TRACE")
+	case LogDebug:
+		if test.args != nil {
+			l.Debug(test.msg, test.args...)
+		} else {
+			l.Debug(test.msg)
+		}
+		expected = subLevel(test.expected, "DEBUG")
+	case LogInfo:
 		if test.args != nil {
 			l.Info(test.msg, test.args...)
 		} else {
 			l.Info(test.msg)
 		}
-		expected := subLevel(test.expected, "INFO")
-		assertMatch(t, expected, &buf)
+		expected = subLevel(test.expected, "INFO")
+	case LogNotice:
+		if test.args != nil {
+			l.Notice(test.msg, test.args...)
+		} else {
+			l.Notice(test.msg)
+		}
+		expected = subLevel(test.expected, "NOTICE")
+	case LogWarn:
+		if test.args != nil {
+			l.Warn(test.msg, test.args...)
+		} else {
+			l.Warn(test.msg)
+		}
+		expected = subLevel(test.expected, "WARN")
+	case LogError:
+		if test.args != nil {
+			l.Error(test.msg, test.args...)
+		} else {
+			l.Error(test.msg)
+		}
+		expected = subLevel(test.expected, "ERROR")
+	case LogCritical:
+		if test.args != nil {
+			l.Critical(test.msg, test.args...)
+		} else {
+			l.Critical(test.msg)
+		}
+		expected = subLevel(test.expected, "CRIT")
+	case LogAlert:
+		if test.args != nil {
+			l.Alert(test.msg, test.args...)
+		} else {
+			l.Alert(test.msg)
+		}
+		expected = subLevel(test.expected, "ALERT")
+	case LogFatal:
+		if test.args != nil {
+			l.Fatal(test.msg, test.args...)
+		} else {
+			l.Fatal(test.msg)
+		}
+		expected = subLevel(test.expected, "FATAL")
 
-		buf.Reset()
 	}
+	assertMatch(t, expected, buf)
+
+	buf.Reset()
 }
 
 func assertMatch(t *testing.T, expected string, buf *bytes.Buffer) {

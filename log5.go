@@ -19,13 +19,22 @@ type Log5Go interface {
 	// Info logs a message at the INFO log level
 	Info(format string, a ...interface{})
 
+	// Notice logs a message at the NOTICE log level
+	Notice(format string, a ...interface{})
+
 	// Warn logs a message at the WARN log level
 	Warn(format string, a ...interface{})
 
 	// Error logs a message at the ERROR log level
 	Error(format string, a ...interface{})
 
-	// Fatal logs a message at the FATAL log level. Note: Fatal() DOES NOT call os.Exit or panic.
+	// Critical logs a message at the CRIT log level
+	Critical(format string, a ...interface{})
+
+	// Alert logs a message at the ALERT log level
+	Alert(format string, a ...interface{})
+
+	// Fatal logs a message at the FATAL/EMERG log level. Note: Fatal() DOES NOT call os.Exit or panic.
 	Fatal(format string, a ...interface{})
 
 	// LogLevel returns the threshold that log messages must meet to be logged
