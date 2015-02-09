@@ -31,7 +31,7 @@ func TestStringFormatterParse(t *testing.T) {
 	var buf []byte
 	sf := NewStringFormatter("%t %l %p (%c:%n): %m %%艾未未")
 	sf.Format(theTime, LogInfo, "艾未未", "acme.go", 123, "hello?", nil, &buf)
-	expected := "2015/02/07 13:16:06 INFO 艾未未 (acme.go:123): hello? %艾未未"
+	expected := theTime.Format(TF_GoStd) + " INFO 艾未未 (acme.go:123): hello? %艾未未"
 	if expected != string(buf) {
 		t.Errorf("expected %s but got %s", expected, string(buf))
 	}
