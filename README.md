@@ -148,6 +148,20 @@ log.Log(LLCustomInfo, "This will get logged with the prefix we registered")
 
 ```
 
+Syslog
+------
+
+```go
+
+// local (Unix socket) syslogd
+log = l5g.Logger(LogDebug).ToLocalSyslog(l5g.SyslogLocal2, "myapp")
+
+// remote syslog (supports "tcp", "udp", Unix sockets)
+log = l5g.Logger(LogDebug).ToRemoteSyslog(l5g.SyslogLocal2, "myapp", "tcp", "syslogd.example.com:514")
+
+```
+Note: All syslog logging priorities are supported. Fatal() will log as EMERG. Otherwise, the naming is 1:1.
+
 Features
 ========
 
@@ -157,6 +171,7 @@ Features
 * Console or file logging
 * JSON layouts for consumption by scripts, Splunk, etc.
 * Add custom structured state data to log messages
+* Syslog support
 * Register loggers and retrieve by key (no globals, or passing logs around)
 * Interleave custom log levels with standard ones
 * Full control over date/time format (uses time.Format under the hood)
@@ -242,7 +257,6 @@ ROADMAP
 =======
 
 * HTML structured layout
-* syslog support (better than Go's native support)
 * Futher performance benchmarking and tuning
 * log chaining?
 * 1.0 (stable API) release
