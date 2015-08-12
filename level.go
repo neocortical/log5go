@@ -21,7 +21,7 @@ const (
 
 // maps log levels to prefix strings describing each. extensible
 var levelMap = map[LogLevel]string{
-	LogAll:      "LOG",
+	LogAll:      "ALL",
 	LogTrace:    "TRACE",
 	LogDebug:    "DEBUG",
 	LogInfo:     "INFO",
