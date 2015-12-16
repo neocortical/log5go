@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	L5G_LOG_FILE_NAME = "L5G_LOG_FILE_NAME"
-	L5G_LOG_LEVEL     = "L5G_LOG_LEVEL"
+	L5G_LOG_FILE_NAME   = "L5G_LOG_FILE_NAME"
+	L5G_LOG_LEVEL       = "L5G_LOG_LEVEL"
+	L5G_LOG_LINE_LENGTH = "L5G_LOG_LINE_LENGTH"
 )
 
 func GetLogger(key string) (l Log5Go) {
@@ -26,6 +27,17 @@ func createLogFromEnvVars() (l Log5Go) {
 	} else {
 		// default to Stdout
 		l.ToStdout().WithStderr()
+	}
+
+	switch os.Getenv(L5G_LOG_LINE_LENGTH) {
+	case "NONE":
+		// no-op
+	case "LONG":
+		l.WithLongLines()
+	case "SHORT":
+		l.WithShortLines()
+	case "":
+		l.WithShortLines()
 	}
 
 	return
