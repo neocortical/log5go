@@ -2,13 +2,16 @@ package log5go
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
-	L5G_LOG_FILE_NAME   = "L5G_LOG_FILE_NAME"
-	L5G_LOG_LEVEL       = "L5G_LOG_LEVEL"
-	L5G_LOG_LINE_LENGTH = "L5G_LOG_LINE_LENGTH"
+	L5G_LOG_FILE_NAME                  = "L5G_LOG_FILE_NAME"
+	L5G_LOG_LEVEL                      = "L5G_LOG_LEVEL"
+	L5G_LOG_LINE_LENGTH                = "L5G_LOG_LINE_LENGTH"
+	L5G_LOG_FILE_ROTATION_FREQUENCY    = "L5G_LOG_FILE_ROTATION_FREQUENCY"
+	L5G_LOG_FILE_ROTATION_KEEP_N_FILES = "L5G_LOG_FILE_ROTATION_KEEP_N_FILES"
 )
 
 func GetLogger(key string) (l Log5Go) {
@@ -24,6 +27,20 @@ func createLogFromEnvVars() (l Log5Go) {
 	path, file := parseFilenameAndPath(os.Getenv(L5G_LOG_FILE_NAME))
 	if path != "" && file != "" {
 		l.ToFile(path, file)
+
+		n := parseKeepNFilesInt(os.Getenv(L5G_LOG_FILE_ROTATION_KEEP_N_FILES))
+		// file rotation
+		switch os.Getenv(L5G_LOG_FILE_ROTATION_FREQUENCY) {
+		case "MINUTE":
+			l.WithRotation(RollMinutely, n)
+		case "HOUR":
+			l.WithRotation(RollHourly, n)
+		case "DAY":
+			l.WithRotation(RollDaily, n)
+		case "WEEK":
+			l.WithRotation(RollWeekly, n)
+		}
+
 	} else {
 		// default to Stdout
 		l.ToStdout().WithStderr()
@@ -68,5 +85,14 @@ func parseFilenameAndPath(fullname string) (path, filename string) {
 
 	path = fullname[:i]
 	filename = fullname[i+1:]
+	return
+}
+
+func parseKeepNFilesInt(str string) (i int) {
+	i, err := strconv.Atoi(str)
+	if err != nil {
+		// default to 1
+		i = 1
+	}
 	return
 }

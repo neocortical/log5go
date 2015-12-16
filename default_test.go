@@ -37,3 +37,19 @@ func Test_parseFilenameAndPath_TraliningSlash(t *testing.T) {
 	assert.Equal(t, "", path)
 	assert.Equal(t, "", file)
 }
+
+func Test_parseKeepNFilesInt_Empty(t *testing.T) {
+	assert.Equal(t, 1, parseKeepNFilesInt(""))
+}
+
+func Test_parseKeepNFilesInt_10(t *testing.T) {
+	assert.Equal(t, 10, parseKeepNFilesInt("10"))
+}
+
+func Test_parseKeepNFilesInt_1(t *testing.T) {
+	assert.Equal(t, 1, parseKeepNFilesInt("1"))
+}
+
+func Test_parseKeepNFilesInt_NotNumeric(t *testing.T) {
+	assert.Equal(t, 1, parseKeepNFilesInt("foobar"))
+}
