@@ -24,7 +24,7 @@ type logconf struct {
 	logLineLength        string
 }
 
-var lock = sync.RWMutex{}
+var lock = sync.Mutex{}
 var conf *logconf
 
 func GetConsoleLogger() (l Log5Go) {
