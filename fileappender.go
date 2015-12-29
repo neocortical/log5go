@@ -11,7 +11,7 @@ import (
 type fileAppender struct {
 	lock          sync.Mutex
 	f             *os.File
-	fname					string 				// full path to file
+	fname         string // full path to file
 	lastOpenTime  time.Time
 	nextRollTime  time.Time
 	rollFrequency rollFrequency
@@ -101,7 +101,7 @@ func (a *fileAppender) shouldAttemptFileReopen() bool {
 
 func (a *fileAppender) reopenFile() {
 	a.lastOpenTime = time.Now()
-	newFile, err := os.OpenFile(a.fname, os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	newFile, err := os.OpenFile(a.fname, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err == nil {
 		a.f = newFile
 	} else {

@@ -45,12 +45,12 @@ func TestWatchFiles(t *testing.T) {
 		t.Errorf("error opening test file: %v", err)
 	}
 	a := &fileAppender{
-		f: logfile,
-		fname: fname,
-		lastOpenTime: time.Now(),
-		nextRollTime: time.Now(),
+		f:             logfile,
+		fname:         fname,
+		lastOpenTime:  time.Now(),
+		nextRollTime:  time.Now(),
 		rollFrequency: RollNone,
-		keepNLogs: SaveAllLogs,
+		keepNLogs:     SaveAllLogs,
 	}
 	fileAppenderMap[fname] = a
 
@@ -76,12 +76,12 @@ func TestAutoReopen(t *testing.T) {
 		t.Errorf("error opening test file: %v", err)
 	}
 	a := &fileAppender{
-		f: logfile,
-		fname: fname,
-		lastOpenTime: time.Now(),
-		nextRollTime: time.Now(),
+		f:             logfile,
+		fname:         fname,
+		lastOpenTime:  time.Now(),
+		nextRollTime:  time.Now(),
 		rollFrequency: RollNone,
-		keepNLogs: SaveAllLogs,
+		keepNLogs:     SaveAllLogs,
 	}
 	fileAppenderMap[fname] = a
 

@@ -162,6 +162,27 @@ log = l5g.Logger(LogDebug).ToRemoteSyslog(l5g.SyslogLocal2, "myapp", "tcp", "sys
 ```
 Note: All syslog logging priorities are supported. Fatal() will log as EMERG. Otherwise, the naming is 1:1.
 
+Default Logger
+--------------
+
+A default logger is availabe via `GetLogger(key string)` and is configured from environment variables. If no log5go environment variables are set this logger defaults to logging to stdout and stderr. Log messages are prefixed with `key`.
+
+Example:
+
+```go
+log = l5g.GetLogger("foo")
+
+log.Info("some information worth logging.")
+```
+
+The following environment variables can be used to configure default loggers:
+* L5G_LOG_FILE_NAME - The full path to the logfile to log to. If this environment variable is not set the default logger will log to stdout and stderr.
+* L5G_LOG_LEVEL - The level: ALL, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRIT, ALERT, or FATAL.
+* L5G_LOG_LINE_LENGTH - LONG, SHORT, or NONE. SHORT includes the name of the source file and line number, LONG includes the full path to source and line number, NONE excludes source and line number information in log messages.
+* L5G_LOG_FILE_ROTATION_FREQUENCY - NONE, MINUTE, HOUR, DAY or WEEK. Frequency to rotate log files.
+* L5G_LOG_FILE_ROTATION_KEEP_N_FILES - Number of previous log files to keep.
+
+
 Features
 ========
 
